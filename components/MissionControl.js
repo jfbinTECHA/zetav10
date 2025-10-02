@@ -1,122 +1,121 @@
-import { useEffect, useState } from "react";
-import { useLogs } from "./LogsContext";
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import useSWR from 'swr';
+import dynamic from 'next/dynamic';
+import AgentCard from './AgentCard';
+import toast from 'react-hot-toast';
 
-export default function MissionControl({ agentStatuses, filters, setFilters }) {
-  const { logs } = useLogs();
-  const [activeTasks, setActiveTasks] = useState([]);
+const LogsPanel = dynamic(() => import('./LogsPanel'), { ssr: false });
 
-  const agentColors = {
-    Chrono: "bg-green-100 text-green-800 border-green-300",
-    Vega: "bg-purple-100 text-purple-800 border-purple-300",
-    Aria: "bg-blue-100 text-blue-800 border-blue-300",
-    "Kilo Code": "bg-orange-100 text-orange-800 border-orange-300",
-    Default: "bg-gray-100 text-gray-800 border-gray-300",
-  };
+const fetcher = (...args) => fetch(...args).then(res => {
+  if (!res.ok) throw new Error('Network response was not ok');
+  return res.json();
+});
+
+/**
+ * MissionControl
+ * - Uses SWR for client caching + revalidation
+ * - Shows audio/sound gating (user gesture required)
+ * - Clean WebSocket example (if you use sockets, adapt below)
+ */
+
+export default function MissionControl({ apiBase = '/api' }) {
+  const { data, error, mutate } = useSWR(`${apiBase}/agents`, fetcher, {
+    refreshInterval: 5000,
+    revalidateOnFocus: true,
+  });
+
+  const [panicMode, setPanicMode] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  const audioRef = useRef(null);
+  const wsRef = useRef(null);
 
   useEffect(() => {
-    let filtered = logs
-      .slice(-50)
-      .filter((log) => log.message.includes("task") || log.message.includes("active"))
-      .map((log) => ({
-        agent: log.agent || "Unknown",
-        message: log.message,
-        priority: log.priority || "low",
-        time: log.timestamp.toLocaleTimeString(),
-      }));
+    if (!audioRef.current) {
+      audioRef.current = new Audio('/alert.mp3');
+      audioRef.current.loop = true;
+      audioRef.current.volume = 0.5;
+    }
+  }, []);
 
-    if (filters.agent !== "all") filtered = filtered.filter((log) => log.agent === filters.agent);
-    if (filters.priority !== "all") filtered = filtered.filter((log) => log.priority === filters.priority);
-    if (filters.searchTerm.trim() !== "")
-      filtered = filtered.filter((log) => log.message.toLowerCase().includes(filters.searchTerm.toLowerCase()));
+  const togglePanic = useCallback(async (value) => {
+    setPanicMode(Boolean(value));
+    if (value && soundEnabled) {
+      try {
+        await audioRef.current?.play();
+      } catch (err) {
+        console.warn('Audio blocked by browser: ', err);
+        toast('Audio blocked — using visual alerts only');
+      }
+    } else {
+      audioRef.current?.pause();
+      audioRef.current?.currentTime && (audioRef.current.currentTime = 0);
+    }
+  }, [soundEnabled]);
 
-    setActiveTasks(filtered.reverse());
-  }, [logs, filters]);
+  // Example WebSocket connection skeleton (optional)
+  useEffect(() => {
+    // If you use server socket events, wire them here
+    // const ws = new WebSocket('wss://example.com/agent-stream');
+    // wsRef.current = ws;
+    // ws.onmessage = (ev) => { mutate(); /* or process event */ };
+    // ws.onerror = () => { console.error('WS error'); };
+    // return () => { ws.close(); };
+    return undefined;
+  }, [mutate]);
 
-  const activeCount = Object.values(agentStatuses).filter((s) => s === "active").length;
-  const idleCount = Object.values(agentStatuses).filter((s) => s === "idle").length;
+  if (error) {
+    return <div className="p-4">Failed to load agents: {String(error.message)}</div>;
+  }
+
+  const agents = Array.isArray(data?.agents) ? data.agents : [];
+
+  const handleAcknowledge = async (agent) => {
+    try {
+      await fetch(`${apiBase}/acknowledge`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agentId: agent.id || agent.name }),
+      });
+      toast.success(`Acknowledged ${agent.name || 'agent'}`);
+      mutate(); // refresh
+    } catch (err) {
+      toast.error('Failed to acknowledge');
+    }
+  };
 
   return (
-    <div className="bg-indigo-50 border border-indigo-300 rounded-2xl p-4 shadow-md">
-      <h2 className="text-lg font-bold text-indigo-800 mb-2">🛰 Mission Control</h2>
-
-      {/* Status Summary */}
-      <div className="flex gap-4 mb-3 text-sm font-medium">
-        <span className="px-2 py-1 rounded bg-green-100 text-green-800 border border-green-300">
-          ✅ Active Agents: {activeCount}
-        </span>
-        <span className="px-2 py-1 rounded bg-red-100 text-red-800 border border-red-300">
-          ⏸ Idle Agents: {idleCount}
-        </span>
+    <section className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Mission Control</h2>
+        <div className="flex items-center gap-3">
+          {!soundEnabled && (
+            <button
+              onClick={() => setSoundEnabled(true)}
+              className="px-3 py-1 rounded bg-gray-800 text-white"
+            >
+              Enable Sounds (click to allow)
+            </button>
+          )}
+          <button
+            onClick={() => togglePanic(!panicMode)}
+            aria-pressed={panicMode}
+            className={`px-3 py-1 rounded ${panicMode ? 'bg-red-600 text-white' : 'bg-gray-200'}`}
+          >
+            {panicMode ? 'Disable Panic' : 'Enable Panic'}
+          </button>
+        </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-2 mb-3 text-sm">
-        <select
-          value={filters.priority}
-          onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
-          className="px-2 py-1 border rounded"
-        >
-          <option value="all">All Priorities</option>
-          <option value="high">High ⚡</option>
-          <option value="medium">Medium 🛠</option>
-          <option value="low">Low 💤</option>
-        </select>
-
-        <select
-          value={filters.agent}
-          onChange={(e) => setFilters({ ...filters, agent: e.target.value })}
-          className="px-2 py-1 border rounded"
-        >
-          <option value="all">All Agents</option>
-          <option value="Chrono">Chrono</option>
-          <option value="Vega">Vega</option>
-          <option value="Aria">Aria</option>
-          <option value="Kilo Code">Kilo Code</option>
-        </select>
-
-        <input
-          type="text"
-          placeholder="Search tasks..."
-          value={filters.searchTerm}
-          onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })}
-          className="px-2 py-1 border rounded flex-1"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {agents.length === 0 && <div className="text-gray-500">No agents found</div>}
+        {agents.map(agent => (
+          <AgentCard key={agent.id || agent.name} agent={agent} onAcknowledge={handleAcknowledge} />
+        ))}
       </div>
 
-      {/* Task List */}
-      <div className="h-40 overflow-y-auto bg-white border rounded-lg p-2">
-        {activeTasks.length > 0 ? (
-          activeTasks.map((task, idx) => {
-            const colorClass = agentColors[task.agent] || agentColors.Default;
-            const priorityColor =
-              task.priority === "high"
-                ? "bg-red-200 text-red-800"
-                : task.priority === "medium"
-                ? "bg-orange-200 text-orange-800"
-                : "bg-gray-200 text-gray-700";
-
-            return (
-              <div
-                key={idx}
-                className="text-xs font-mono p-1 border-b last:border-0 flex justify-between items-center"
-              >
-                <div className="flex items-center gap-2">
-                  <span className={`px-2 py-0.5 rounded-lg border text-[10px] font-bold ${colorClass}`}>
-                    {task.agent}
-                  </span>
-                  <span className={`px-1 rounded text-[10px] font-bold ${priorityColor}`}>
-                    {task.priority.toUpperCase()}
-                  </span>
-                  <span className="text-indigo-700">{task.message}</span>
-                </div>
-                <span className="text-gray-500">{task.time}</span>
-              </div>
-            );
-          })
-        ) : (
-          <p className="text-gray-400 text-xs">No tasks match current filters.</p>
-        )}
+      <div>
+        <LogsPanel apiBase={apiBase} panicMode={panicMode} />
       </div>
-    </div>
+    </section>
   );
 }

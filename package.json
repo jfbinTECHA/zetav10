@@ -15,7 +15,8 @@
     "prop-types": "^15.8.1",
     "react": "latest",
     "react-dom": "latest",
-    "react-hot-toast": "^2.6.0"
+    "react-hot-toast": "^2.6.0",
+    "swr": "^2.3.6"
   },
   "devDependencies": {
     "autoprefixer": "latest",
