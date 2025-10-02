@@ -11,11 +11,12 @@ import threading
 from datetime import datetime
 from flask import Flask, jsonify, send_from_directory
 from flask_socketio import SocketIO, emit
-import eventlet
-eventlet.monkey_patch()
+import gevent
+from gevent import monkey
+monkey.patch_all()
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='gevent')
 
 # Global data storage
 current_data = None
@@ -69,7 +70,7 @@ def broadcast_updates():
             print(f"Error in broadcast loop: {e}")
 
         # Check every 2 seconds (faster than AJAX polling)
-        eventlet.sleep(2)
+        gevent.sleep(2)
 
 @app.route('/')
 def index():

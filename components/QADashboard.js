@@ -146,8 +146,8 @@ export default function QADashboard() {
         </div>
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-700">Trend</h3>
-          <p className={`text-3xl font-bold ${getTrendColor(qaResults.trends.improvement_trend)}`}>
-            {qaResults.trends.improvement_trend}
+          <p className={`text-3xl font-bold ${getTrendColor(qaResults.trends?.improvement_trend)}`}>
+            {qaResults.trends?.improvement_trend || 'stable'}
           </p>
         </div>
       </div>
@@ -177,7 +177,7 @@ export default function QADashboard() {
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold mb-4">Recent Test Results</h2>
           <div className="space-y-3 max-h-80 overflow-y-auto">
-            {qaResults.results.slice(0, 10).map((item) => (
+            {(qaResults.results || []).slice(0, 10).map((item) => (
               <div
                 key={item.id}
                 className={`p-3 rounded-lg border transition-all duration-500 ${
@@ -202,7 +202,7 @@ export default function QADashboard() {
       </div>
 
       {/* Recent Failures */}
-      {qaResults.trends.recent_failures.length > 0 && (
+      {(qaResults.trends?.recent_failures?.length > 0) && (
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold mb-4 text-red-600">Recent Failures</h2>
           <div className="space-y-2">

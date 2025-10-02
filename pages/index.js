@@ -28,7 +28,7 @@ const Page = () => {
             </p>
             <div style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', gap: '10px' }}>
               <a
-                href="http://localhost:5000"
+                href="/qa-dashboard-realtime.html"
                 target="_blank"
                 style={{
                   backgroundColor: '#FF5722',
@@ -41,7 +41,7 @@ const Page = () => {
                   boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                 }}
               >
-                ⚡ Real-Time QA Dashboard (WebSocket)
+                ⚡ Real-Time QA Dashboard (Polling)
               </a>
               <a
                 href="/qa-dashboard.html"

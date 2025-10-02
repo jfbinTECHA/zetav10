@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "username": "admin",
+    "email": "admin@zeta-ai.com",
+    "role": "Admin",
+    "status": "active",
+    "createdAt": "2025-10-02T20:59:13.287Z",
+    "lastLogin": null
+  }
+]

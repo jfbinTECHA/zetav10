@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Zeta AI Live QA Dashboard - Polling Version</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    body { font-family: Arial; background: #f7f7f7; margin: 20px; }
+    h1 { color: #333; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 30px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #4CAF50; color: white; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+    .PASS { background-color: #c8e6c9; font-weight: bold; }
+    .FAIL { background-color: #ffcdd2; font-weight: bold; }
+    .NEWFAIL { background-color: #ff8a65; font-weight: bold; animation: pulse 2s infinite; }
+    .chart-container { width: 450px; margin: 20px 0; }
+    #charts { display: flex; flex-wrap: wrap; gap: 30px; }
+    .connection-status {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        z-index: 1000;
+    }
+    .status-connected { background: #4CAF50; color: white; }
+    .status-disconnected { background: #F44336; color: white; }
+    .status-connecting { background: #FF9800; color: white; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+</style>
+</head>
+<body>
+<h1>Zeta AI Live QA Dashboard - Polling Version</h1>
+
+<div id="connectionStatus" class="connection-status status-connecting">
+    🔄 Loading...
+</div>
+
+<p id="lastUpdated"></p>
+
+<div id="dashboard"></div>
+<h2>Regression Trends</h2>
+<div id="trendCharts"></div>
+
+<script>
+let previousFailures = new Set();
+let moduleCharts = {};
+let trendCharts = {};
+let pollInterval;
+let isConnected = false;
+
+const POLL_INTERVAL = 5000; // Poll every 5 seconds
+
+// Initialize polling
+function initPolling() {
+    updateConnectionStatus('connecting', '🔄 Connecting...');
+    pollData();
+    pollInterval = setInterval(pollData, POLL_INTERVAL);
+}
+
+// Poll for data updates
+async function pollData() {
+    try {
+        const response = await fetch('/api/qa-data');
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Received update:', data);
+
+        renderModules(data.current || []);
+        renderTrends(data.historical || {});
+        document.getElementById("lastUpdated").innerText = "Last updated: " + new Date().toLocaleString();
+
+        if (!isConnected) {
+            isConnected = true;
+            updateConnectionStatus('connected', '🟢 Connected - Polling');
+        }
+    } catch (error) {
+        console.error('Polling error:', error);
+        if (isConnected) {
+            isConnected = false;
+            updateConnectionStatus('disconnected', '🔴 Connection Failed');
+        }
+    }
+}
+
+function updateConnectionStatus(status, message) {
+    const statusEl = document.getElementById('connectionStatus');
+    statusEl.className = `connection-status status-${status}`;
+    statusEl.innerText = message;
+}
+
+// ---------- Render Module Tables + Pie Charts ----------
+function renderModules(data) {
+    const dash = document.getElementById("dashboard");
+    dash.innerHTML = "";
+    let now = new Date().toLocaleString();
+    document.getElementById("lastUpdated").innerText = "Last updated: " + now;
+
+    data.forEach(module => {
+        let div = document.createElement("div");
+        div.innerHTML = `<h2>${module.module}</h2>`;
+
+        let table = document.createElement("table");
+        let header = table.insertRow();
+        ["Test Case","Expected Result","Pass/Fail","Notes"].forEach(text=>{
+            let th=document.createElement("th"); th.innerText=text; header.appendChild(th);
+        });
+
+        let passCount=0, failCount=0;
+        module.tests.forEach(test=>{
+            let row = table.insertRow();
+            let testId = module.module+"::"+test.test_case;
+            let status = test.pass_fail || "";
+            if(status==="FAIL" && !previousFailures.has(testId)) status="NEWFAIL";
+            if(test.pass_fail==="PASS") passCount++; else failCount++;
+
+            row.insertCell().innerText = test.test_case;
+            row.insertCell().innerText = test.expected_result || "";
+            let cell = row.insertCell(); cell.innerText = test.pass_fail; cell.className = status;
+            row.insertCell().innerText = test.notes || "";
+
+            if(test.pass_fail==="FAIL") previousFailures.add(testId);
+            else previousFailures.delete(testId);
+        });
+
+        div.appendChild(table);
+
+        // Pie chart
+        let canvas = document.createElement("canvas");
+        div.appendChild(canvas);
+        let chartKey = module.module;
+        if(!moduleCharts[chartKey]){
+            moduleCharts[chartKey] = new Chart(canvas, {
+                type: 'pie',
+                data: { labels:['PASS','FAIL'], datasets:[{data:[passCount,failCount], backgroundColor:['#4CAF50','#F44336']}] },
+                options: { responsive:true, plugins:{ legend:{position:'bottom'}, title:{display:true, text: module.module+" Pass/Fail"} } }
+            });
+        } else {
+            moduleCharts[chartKey].data.datasets[0].data=[passCount,failCount];
+            moduleCharts[chartKey].update();
+        }
+
+        dash.appendChild(div);
+    });
+}
+
+// ---------- Render Regression Trend Charts ----------
+function renderTrends(history) {
+    const container = document.getElementById("trendCharts");
+    container.innerHTML = "";
+
+    Object.entries(history).forEach(([testId, entries])=>{
+        let labels = entries.map(e=>new Date(e.timestamp).toLocaleString());
+        let data = entries.map(e=> e.status==="PASS"?1:0);
+        let colors = entries.map(e=> e.status==="PASS" ? "#4CAF50" : "#F44336");
+
+        let div = document.createElement("div");
+        div.className="chart-container";
+        let canvas=document.createElement("canvas");
+        div.appendChild(canvas);
+        container.appendChild(div);
+
+        if(!trendCharts[testId]){
+            trendCharts[testId]=new Chart(canvas,{
+                type:'line',
+                data:{
+                    labels:labels,
+                    datasets:[{label:testId+" Trend", data:data, borderColor:"#2196F3", fill:false, tension:0.2,
+                               pointBackgroundColor:colors, pointRadius:6}]
+                },
+                options:{
+                    scales:{ y:{ min:0, max:1, ticks:{ stepSize:1, callback:v=>v===1?"PASS":"FAIL"}}},
+                    plugins:{ legend:{display:false}, title:{display:true,text:testId}}
+                }
+            });
+        } else {
+            let chart=trendCharts[testId];
+            chart.data.labels=labels;
+            chart.data.datasets[0].data=data;
+            chart.data.datasets[0].pointBackgroundColor=colors;
+            chart.update();
+        }
+    });
+}
+
+// ---------- Manual Update Request ----------
+function requestUpdate() {
+    pollData();
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initPolling();
+});
+
+// Add manual refresh button
+document.addEventListener('DOMContentLoaded', function() {
+    const refreshBtn = document.createElement('button');
+    refreshBtn.innerText = '🔄 Manual Refresh';
+    refreshBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; padding: 10px 15px; background: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer;';
+    refreshBtn.onclick = requestUpdate;
+    document.body.appendChild(refreshBtn);
+});
+</script>
+</body>
+</html>
