@@ -1,200 +1,280 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zeta AI Dashboard – User Manual</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-  @media print {
-    body { -webkit-print-color-adjust: exact; }
-    .page-break { page-break-before: always; }
-  }
-</style>
-</head>
-<body class="bg-gray-50 font-sans text-gray-900 p-8">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zeta AI Dashboard – User Manual</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @media print {
+        body {
+          -webkit-print-color-adjust: exact;
+        }
+        .page-break {
+          page-break-before: always;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 font-sans text-gray-900 p-8">
+    <!-- Cover Page -->
+    <div class="text-center mb-16">
+      <h1 class="text-5xl font-bold text-indigo-700 mb-4">Zeta AI Dashboard</h1>
+      <h2 class="text-2xl font-medium text-gray-700 mb-8">User Manual</h2>
+      <p class="text-gray-600">Version 1.0 | Date: 2025-10-01</p>
+      <div class="mt-12">
+        <img
+          src="./images/logo.png"
+          alt="Zeta AI Logo"
+          class="mx-auto w-32 h-32"
+        />
+      </div>
+    </div>
 
-<!-- Cover Page -->
-<div class="text-center mb-16">
-  <h1 class="text-5xl font-bold text-indigo-700 mb-4">Zeta AI Dashboard</h1>
-  <h2 class="text-2xl font-medium text-gray-700 mb-8">User Manual</h2>
-  <p class="text-gray-600">Version 1.0 | Date: 2025-10-01</p>
-  <div class="mt-12">
-    <img src="./images/logo.png" alt="Zeta AI Logo" class="mx-auto w-32 h-32"/>
-  </div>
-</div>
+    <div class="page-break"></div>
 
-<div class="page-break"></div>
+    <!-- Table of Contents -->
+    <h2 class="text-3xl font-bold text-indigo-700 mb-4">
+      📖 Table of Contents
+    </h2>
+    <ol class="list-decimal list-inside space-y-1 text-gray-700 mb-8">
+      <li>Overview</li>
+      <li>Getting Started</li>
+      <li>Interface Layout</li>
+      <li>Task Management</li>
+      <li>Notifications & Alerts</li>
+      <li>Task Acknowledgment</li>
+      <li>Tips & Best Practices</li>
+      <li>Troubleshooting</li>
+      <li>Support</li>
+    </ol>
 
-<!-- Table of Contents -->
-<h2 class="text-3xl font-bold text-indigo-700 mb-4">📖 Table of Contents</h2>
-<ol class="list-decimal list-inside space-y-1 text-gray-700 mb-8">
-  <li>Overview</li>
-  <li>Getting Started</li>
-  <li>Interface Layout</li>
-  <li>Task Management</li>
-  <li>Notifications & Alerts</li>
-  <li>Task Acknowledgment</li>
-  <li>Tips & Best Practices</li>
-  <li>Troubleshooting</li>
-  <li>Support</li>
-</ol>
+    <div class="page-break"></div>
 
-<div class="page-break"></div>
+    <!-- Overview -->
+    <h2 class="text-3xl font-bold text-indigo-700 mb-4">Overview</h2>
+    <p class="mb-4">
+      The <strong>Zeta AI Dashboard</strong> is a real-time command center for
+      monitoring AI agents and managing tasks.
+    </p>
+    <p class="mb-2"><strong>Purpose:</strong></p>
+    <ul class="list-disc list-inside mb-4 ml-4">
+      <li>Monitor AI agents in real-time</li>
+      <li>Identify high-priority tasks instantly</li>
+      <li>Manage AI-driven workflows efficiently</li>
+    </ul>
+    <p class="mb-2"><strong>Key Features:</strong></p>
+    <ul class="list-disc list-inside mb-4 ml-4">
+      <li>AgentCards with status and task history</li>
+      <li>Priority badges: High ⚡ / Medium 🛠 / Low 💤</li>
+      <li>Filters by agent, priority, and keyword</li>
+      <li>Highlight-only mode for focused tasks</li>
+      <li>Toast + sound alerts for high-priority tasks</li>
+      <li>Panic mode for flashing high-priority tasks</li>
+      <li>Task acknowledgment to mark completed actions</li>
+    </ul>
+    <div class="mb-8">
+      <img
+        src="./images/overview.png"
+        alt="Overview Screenshot"
+        class="w-full border rounded-lg shadow"
+      />
+    </div>
 
-<!-- Overview -->
-<h2 class="text-3xl font-bold text-indigo-700 mb-4">Overview</h2>
-<p class="mb-4">The <strong>Zeta AI Dashboard</strong> is a real-time command center for monitoring AI agents and managing tasks.</p>
-<p class="mb-2"><strong>Purpose:</strong></p>
-<ul class="list-disc list-inside mb-4 ml-4">
-  <li>Monitor AI agents in real-time</li>
-  <li>Identify high-priority tasks instantly</li>
-  <li>Manage AI-driven workflows efficiently</li>
-</ul>
-<p class="mb-2"><strong>Key Features:</strong></p>
-<ul class="list-disc list-inside mb-4 ml-4">
-  <li>AgentCards with status and task history</li>
-  <li>Priority badges: High ⚡ / Medium 🛠 / Low 💤</li>
-  <li>Filters by agent, priority, and keyword</li>
-  <li>Highlight-only mode for focused tasks</li>
-  <li>Toast + sound alerts for high-priority tasks</li>
-  <li>Panic mode for flashing high-priority tasks</li>
-  <li>Task acknowledgment to mark completed actions</li>
-</ul>
-<div class="mb-8">
-  <img src="./images/overview.png" alt="Overview Screenshot" class="w-full border rounded-lg shadow"/>
-</div>
+    <div class="page-break"></div>
 
-<div class="page-break"></div>
+    <!-- Getting Started -->
+    <h2 class="text-3xl font-bold text-indigo-700 mb-4">Getting Started</h2>
+    <p class="mb-2"><strong>System Requirements:</strong></p>
+    <ul class="list-disc list-inside mb-4 ml-4">
+      <li>Modern web browser (Chrome, Firefox, Edge, Safari)</li>
+      <li>Access to the dashboard URL or local deployment</li>
+      <li>Audio enabled for sound alerts</li>
+    </ul>
+    <p class="mb-2"><strong>Initial Setup:</strong></p>
+    <ol class="list-decimal list-inside mb-4 ml-4">
+      <li>Open the dashboard in your browser</li>
+      <li>Ensure `/alert.mp3` sound file is accessible</li>
+      <li>
+        Confirm agent data is streaming (AgentCards populate tasks
+        automatically)
+      </li>
+    </ol>
+    <div class="mb-8">
+      <img
+        src="./images/getting_started.png"
+        alt="Getting Started Screenshot"
+        class="w-full border rounded-lg shadow"
+      />
+    </div>
 
-<!-- Getting Started -->
-<h2 class="text-3xl font-bold text-indigo-700 mb-4">Getting Started</h2>
-<p class="mb-2"><strong>System Requirements:</strong></p>
-<ul class="list-disc list-inside mb-4 ml-4">
-  <li>Modern web browser (Chrome, Firefox, Edge, Safari)</li>
-  <li>Access to the dashboard URL or local deployment</li>
-  <li>Audio enabled for sound alerts</li>
-</ul>
-<p class="mb-2"><strong>Initial Setup:</strong></p>
-<ol class="list-decimal list-inside mb-4 ml-4">
-  <li>Open the dashboard in your browser</li>
-  <li>Ensure `/alert.mp3` sound file is accessible</li>
-  <li>Confirm agent data is streaming (AgentCards populate tasks automatically)</li>
-</ol>
-<div class="mb-8">
-  <img src="./images/getting_started.png" alt="Getting Started Screenshot" class="w-full border rounded-lg shadow"/>
-</div>
+    <div class="page-break"></div>
 
-<div class="page-break"></div>
+    <!-- Interface Layout -->
+    <h2 class="text-3xl font-bold text-indigo-700 mb-4">Interface Layout</h2>
 
-<!-- Interface Layout -->
-<h2 class="text-3xl font-bold text-indigo-700 mb-4">Interface Layout</h2>
+    <h3 class="text-2xl font-semibold text-indigo-600 mb-2">Mission Control</h3>
+    <p class="mb-4">
+      Displays active/idle agent summary, filters, and live task list.
+    </p>
+    <div class="mb-6">
+      <img
+        src="./images/mission_control.png"
+        alt="Mission Control Screenshot"
+        class="w-full border rounded-lg shadow"
+      />
+    </div>
 
-<h3 class="text-2xl font-semibold text-indigo-600 mb-2">Mission Control</h3>
-<p class="mb-4">Displays active/idle agent summary, filters, and live task list.</p>
-<div class="mb-6">
-  <img src="./images/mission_control.png" alt="Mission Control Screenshot" class="w-full border rounded-lg shadow"/>
-</div>
+    <h3 class="text-2xl font-semibold text-indigo-600 mb-2">
+      Highlight-Only Toggle
+    </h3>
+    <p class="mb-4">
+      Shows only tasks matching active filters to reduce clutter.
+    </p>
 
-<h3 class="text-2xl font-semibold text-indigo-600 mb-2">Highlight-Only Toggle</h3>
-<p class="mb-4">Shows only tasks matching active filters to reduce clutter.</p>
+    <h3 class="text-2xl font-semibold text-indigo-600 mb-2">AgentCards</h3>
+    <p class="mb-4">
+      Displays Name, Role, Task history, Priority badges, and Status.
+    </p>
+    <div class="mb-6">
+      <img
+        src="./images/agentcards.png"
+        alt="AgentCards Screenshot"
+        class="w-full border rounded-lg shadow"
+      />
+    </div>
 
-<h3 class="text-2xl font-semibold text-indigo-600 mb-2">AgentCards</h3>
-<p class="mb-4">Displays Name, Role, Task history, Priority badges, and Status.</p>
-<div class="mb-6">
-  <img src="./images/agentcards.png" alt="AgentCards Screenshot" class="w-full border rounded-lg shadow"/>
-</div>
+    <h3 class="text-2xl font-semibold text-indigo-600 mb-2">
+      Panic Mode Button
+    </h3>
+    <p class="mb-4">
+      Toggle to flash all high-priority tasks and play continuous alert sound.
+    </p>
 
-<h3 class="text-2xl font-semibold text-indigo-600 mb-2">Panic Mode Button</h3>
-<p class="mb-4">Toggle to flash all high-priority tasks and play continuous alert sound.</p>
+    <div class="page-break"></div>
 
-<div class="page-break"></div>
+    <!-- Task Management -->
+    <h2 class="text-3xl font-bold text-indigo-700 mb-4">Task Management</h2>
 
-<!-- Task Management -->
-<h2 class="text-3xl font-bold text-indigo-700 mb-4">Task Management</h2>
+    <h3 class="text-2xl font-semibold text-indigo-600 mb-2">Priority Badges</h3>
+    <ul class="list-disc list-inside mb-4 ml-4">
+      <li>
+        <span class="text-red-600 font-bold">High ⚡</span> – Immediate
+        attention
+      </li>
+      <li>
+        <span class="text-orange-600 font-bold">Medium 🛠</span> – Important
+      </li>
+      <li><span class="text-gray-500 font-bold">Low 💤</span> – Routine</li>
+    </ul>
 
-<h3 class="text-2xl font-semibold text-indigo-600 mb-2">Priority Badges</h3>
-<ul class="list-disc list-inside mb-4 ml-4">
-  <li><span class="text-red-600 font-bold">High ⚡</span> – Immediate attention</li>
-  <li><span class="text-orange-600 font-bold">Medium 🛠</span> – Important</li>
-  <li><span class="text-gray-500 font-bold">Low 💤</span> – Routine</li>
-</ul>
+    <h3 class="text-2xl font-semibold text-indigo-600 mb-2">Filters</h3>
+    <ul class="list-disc list-inside mb-4 ml-4">
+      <li>Priority: High / Medium / Low / All</li>
+      <li>Agent: Single or multiple</li>
+      <li>Keyword: Live search</li>
+    </ul>
 
-<h3 class="text-2xl font-semibold text-indigo-600 mb-2">Filters</h3>
-<ul class="list-disc list-inside mb-4 ml-4">
-  <li>Priority: High / Medium / Low / All</li>
-  <li>Agent: Single or multiple</li>
-  <li>Keyword: Live search</li>
-</ul>
+    <div
+      class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 rounded-lg"
+    >
+      💡 <strong>Tip:</strong> Use highlight-only mode to focus on urgent tasks
+      and reduce visual clutter.
+    </div>
 
-<div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 rounded-lg">
-  💡 <strong>Tip:</strong> Use highlight-only mode to focus on urgent tasks and reduce visual clutter.
-</div>
+    <div class="page-break"></div>
 
-<div class="page-break"></div>
+    <!-- Notifications & Alerts -->
+    <h2 class="text-3xl font-bold text-indigo-700 mb-4">
+      Notifications & Alerts
+    </h2>
 
-<!-- Notifications & Alerts -->
-<h2 class="text-3xl font-bold text-indigo-700 mb-4">Notifications & Alerts</h2>
+    <h3 class="text-2xl font-semibold text-indigo-600 mb-2">
+      Toast Notifications
+    </h3>
+    <p class="mb-4">
+      Appear in top-right for high-priority tasks and auto-dismiss after 5
+      seconds.
+    </p>
 
-<h3 class="text-2xl font-semibold text-indigo-600 mb-2">Toast Notifications</h3>
-<p class="mb-4">Appear in top-right for high-priority tasks and auto-dismiss after 5 seconds.</p>
+    <h3 class="text-2xl font-semibold text-indigo-600 mb-2">Sound Alerts</h3>
+    <p class="mb-4">
+      Triggered on high-priority tasks. Volume configurable (default 50%).
+    </p>
 
-<h3 class="text-2xl font-semibold text-indigo-600 mb-2">Sound Alerts</h3>
-<p class="mb-4">Triggered on high-priority tasks. Volume configurable (default 50%).</p>
+    <h3 class="text-2xl font-semibold text-indigo-600 mb-2">Panic Mode</h3>
+    <p class="mb-4">
+      Flashes high-priority tasks and plays continuous alert sound until
+      acknowledged.
+    </p>
+    <div class="mb-6">
+      <img
+        src="./images/alerts.png"
+        alt="Alerts Screenshot"
+        class="w-full border rounded-lg shadow"
+      />
+    </div>
 
-<h3 class="text-2xl font-semibold text-indigo-600 mb-2">Panic Mode</h3>
-<p class="mb-4">Flashes high-priority tasks and plays continuous alert sound until acknowledged.</p>
-<div class="mb-6">
-  <img src="./images/alerts.png" alt="Alerts Screenshot" class="w-full border rounded-lg shadow"/>
-</div>
+    <div class="page-break"></div>
 
-<div class="page-break"></div>
+    <!-- Task Acknowledgment -->
+    <h2 class="text-3xl font-bold text-indigo-700 mb-4">Task Acknowledgment</h2>
+    <p class="mb-4">
+      Each high-priority task has an <strong>Acknowledge</strong> button that
+      stops flashing and dims the task. Panic mode continues for remaining
+      unacknowledged tasks.
+    </p>
+    <div
+      class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg"
+    >
+      ⚠️ <strong>Warning:</strong> Promptly acknowledge tasks to prevent missed
+      alerts and reduce clutter.
+    </div>
 
-<!-- Task Acknowledgment -->
-<h2 class="text-3xl font-bold text-indigo-700 mb-4">Task Acknowledgment</h2>
-<p class="mb-4">Each high-priority task has an <strong>Acknowledge</strong> button that stops flashing and dims the task. Panic mode continues for remaining unacknowledged tasks.</p>
-<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg">
-  ⚠️ <strong>Warning:</strong> Promptly acknowledge tasks to prevent missed alerts and reduce clutter.
-</div>
+    <div class="page-break"></div>
 
-<div class="page-break"></div>
+    <!-- Tips & Best Practices -->
+    <h2 class="text-3xl font-bold text-indigo-700 mb-4">
+      Tips & Best Practices
+    </h2>
+    <ul class="list-disc list-inside mb-4 ml-4">
+      <li>Monitor Mission Control regularly</li>
+      <li>Use highlight-only mode to focus on critical tasks</li>
+      <li>Activate panic mode only for multiple high-priority alerts</li>
+      <li>Adjust sound settings as needed</li>
+    </ul>
+    <div
+      class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 rounded-lg"
+    >
+      💡 <strong>Pro Tip:</strong> Combine filters with highlight-only mode
+      during peak task periods for optimal focus.
+    </div>
 
-<!-- Tips & Best Practices -->
-<h2 class="text-3xl font-bold text-indigo-700 mb-4">Tips & Best Practices</h2>
-<ul class="list-disc list-inside mb-4 ml-4">
-  <li>Monitor Mission Control regularly</li>
-  <li>Use highlight-only mode to focus on critical tasks</li>
-  <li>Activate panic mode only for multiple high-priority alerts</li>
-  <li>Adjust sound settings as needed</li>
-</ul>
-<div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 rounded-lg">
-  💡 <strong>Pro Tip:</strong> Combine filters with highlight-only mode during peak task periods for optimal focus.
-</div>
+    <div class="page-break"></div>
 
-<div class="page-break"></div>
+    <!-- Troubleshooting -->
+    <h2 class="text-3xl font-bold text-indigo-700 mb-4">Troubleshooting</h2>
+    <ul class="list-disc list-inside mb-4 ml-4">
+      <li>No tasks visible: Refresh page and ensure agents are online</li>
+      <li>Sound not playing: Check browser permissions and volume</li>
+      <li>Tasks not updating: Verify network connection</li>
+    </ul>
+    <div
+      class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg"
+    >
+      ⚠️ Tip: Refreshing the dashboard often resolves minor streaming issues.
+    </div>
 
-<!-- Troubleshooting -->
-<h2 class="text-3xl font-bold text-indigo-700 mb-4">Troubleshooting</h2>
-<ul class="list-disc list-inside mb-4 ml-4">
-  <li>No tasks visible: Refresh page and ensure agents are online</li>
-  <li>Sound not playing: Check browser permissions and volume</li>
-  <li>Tasks not updating: Verify network connection</li>
-</ul>
-<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg">
-  ⚠️ Tip: Refreshing the dashboard often resolves minor streaming issues.
-</div>
+    <div class="page-break"></div>
 
-<div class="page-break"></div>
+    <!-- Support -->
+    <h2 class="text-3xl font-bold text-indigo-700 mb-4">Support</h2>
+    <p>For assistance or feature requests:</p>
+    <ul class="list-disc list-inside mb-4 ml-4">
+      <li>Email: support@zeta-ai.com</li>
+      <li>Phone: +1 (555) 123-4567</li>
+    </ul>
 
-<!-- Support -->
-<h2 class="text-3xl font-bold text-indigo-700 mb-4">Support</h2>
-<p>For assistance or feature requests:</p>
-<ul class="list-disc list-inside mb-4 ml-4">
-  <li>Email: support@zeta-ai.com</li>
-  <li>Phone: +1 (555) 123-4567</li>
-</ul>
-
-<p class="text-gray-500 mt-8">End of Manual</p>
-
-</body>
+    <p class="text-gray-500 mt-8">End of Manual</p>
+  </body>
 </html>

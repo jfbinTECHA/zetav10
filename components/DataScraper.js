@@ -1,35 +1,35 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 export default function DataScraper() {
-  const [url, setUrl] = useState('');
+  const [url, setUrl] = useState("");
   const [scrapedData, setScrapedData] = useState(null);
   const [analysis, setAnalysis] = useState(null);
-  const [generatedCode, setGeneratedCode] = useState('');
+  const [generatedCode, setGeneratedCode] = useState("");
 
   const scrapeData = async () => {
     try {
-      const response = await fetch('/api/scrape', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url })
+      const response = await fetch("/api/scrape", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
       });
 
       if (!response.ok) {
         const text = await response.text();
-        alert('Error: ' + text);
+        alert("Error: " + text);
         return;
       }
 
       const data = await response.json();
       if (data.error) {
-        alert('Scraping error: ' + data.error);
+        alert("Scraping error: " + data.error);
       } else {
         setScrapedData(data);
         setAnalysis(null);
-        setGeneratedCode('');
+        setGeneratedCode("");
       }
     } catch (error) {
-      alert('Network error: ' + error.message);
+      alert("Network error: " + error.message);
     }
   };
 
@@ -39,7 +39,7 @@ export default function DataScraper() {
     const words = scrapedData.text.toLowerCase().split(/\s+/);
     const wordCount = words.length;
     const wordFreq = {};
-    words.forEach(word => {
+    words.forEach((word) => {
       if (word.length > 3) {
         wordFreq[word] = (wordFreq[word] || 0) + 1;
       }
@@ -67,7 +67,9 @@ export default function DataScraper() {
   <p>${scrapedData.text.substring(0, 1000)}...</p>
   <h2>Links</h2>
   <ul>
-    ${scrapedData.links.map(link => `<li><a href="${link}">${link}</a></li>`).join('')}
+    ${scrapedData.links
+      .map((link) => `<li><a href="${link}">${link}</a></li>`)
+      .join("")}
   </ul>
 </body>
 </html>
@@ -77,10 +79,15 @@ export default function DataScraper() {
 
   return (
     <div className="bg-white shadow rounded-xl p-4">
-      <h2 className="text-xl font-semibold mb-4">Data Scraper & Code Generator</h2>
+      <h2 className="text-xl font-semibold mb-4">
+        Data Scraper & Code Generator
+      </h2>
       <p className="text-xs text-gray-600 mb-4">
-        Note: GitHub scraping fetches public README files only, respecting GitHub's Terms of Service.
-        YouTube scraping extracts public video metadata and descriptions. Use responsibly and respect platform policies.
+        {/* eslint-disable-next-line react/no-unescaped-entities */}
+        Note: GitHub scraping fetches public README files only, respecting
+        GitHub's Terms of Service. YouTube scraping extracts public video
+        metadata and descriptions. Use responsibly and respect platform
+        policies.
       </p>
 
       <div className="mb-4">
@@ -102,9 +109,16 @@ export default function DataScraper() {
       {scrapedData && (
         <div className="mb-4">
           <h3 className="font-semibold">Scraped Data</h3>
-          <p><strong>Title:</strong> {scrapedData.title}</p>
-          <p><strong>Text Preview:</strong> {scrapedData.text.substring(0, 200)}...</p>
-          <p><strong>Links:</strong> {scrapedData.links.length}</p>
+          <p>
+            <strong>Title:</strong> {scrapedData.title}
+          </p>
+          <p>
+            <strong>Text Preview:</strong> {scrapedData.text.substring(0, 200)}
+            ...
+          </p>
+          <p>
+            <strong>Links:</strong> {scrapedData.links.length}
+          </p>
 
           <button
             onClick={analyzeData}
@@ -119,7 +133,12 @@ export default function DataScraper() {
         <div className="mb-4">
           <h3 className="font-semibold">Analysis</h3>
           <p>Word Count: {analysis.wordCount}</p>
-          <p>Top Words: {analysis.topWords.map(([word, count]) => `${word}(${count})`).join(', ')}</p>
+          <p>
+            Top Words:{" "}
+            {analysis.topWords
+              .map(([word, count]) => `${word}(${count})`)
+              .join(", ")}
+          </p>
 
           <button
             onClick={generateCode}
@@ -133,7 +152,9 @@ export default function DataScraper() {
       {generatedCode && (
         <div className="mb-4">
           <h3 className="font-semibold">Generated Code</h3>
-          <pre className="bg-gray-100 p-2 rounded text-sm overflow-auto max-h-64">{generatedCode}</pre>
+          <pre className="bg-gray-100 p-2 rounded text-sm overflow-auto max-h-64">
+            {generatedCode}
+          </pre>
         </div>
       )}
     </div>

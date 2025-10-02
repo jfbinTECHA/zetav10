@@ -1,12 +1,12 @@
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   const { messages, context } = req.body;
 
   if (!messages || !Array.isArray(messages)) {
-    return res.status(400).json({ error: 'Messages array is required' });
+    return res.status(400).json({ error: "Messages array is required" });
   }
 
   // Check for API key - prioritize GPT-4, then other models
@@ -20,34 +20,33 @@ export default async function handler(req, res) {
   }
 
   try {
-     let aiResponse;
-     let modelUsed = 'local';
+    let aiResponse;
+    let modelUsed = "local";
 
-     if (openaiKey) {
-       // OpenAI GPT-4 integration (prioritized)
-       aiResponse = await callOpenAI(messages, context);
-       modelUsed = 'gpt-4';
-     } else if (anthropicKey) {
-       // Anthropic Claude integration
-       aiResponse = await callAnthropic(messages, context);
-       modelUsed = 'claude-3';
-     } else if (huggingfaceKey) {
-       // Hugging Face model integration
-       aiResponse = await callHuggingFace(messages, context);
-       modelUsed = 'huggingface';
-     } else {
-       return handleLocalFallback(messages, context, res);
-     }
+    if (openaiKey) {
+      // OpenAI GPT-4 integration (prioritized)
+      aiResponse = await callOpenAI(messages, context);
+      modelUsed = "gpt-4";
+    } else if (anthropicKey) {
+      // Anthropic Claude integration
+      aiResponse = await callAnthropic(messages, context);
+      modelUsed = "claude-3";
+    } else if (huggingfaceKey) {
+      // Hugging Face model integration
+      aiResponse = await callHuggingFace(messages, context);
+      modelUsed = "huggingface";
+    } else {
+      return handleLocalFallback(messages, context, res);
+    }
 
     return res.status(200).json({
       response: aiResponse.content || aiResponse,
       source: modelUsed,
       usage: aiResponse.usage || null,
-      model: modelUsed
+      model: modelUsed,
     });
-
   } catch (error) {
-    console.error('AI API error:', error);
+    console.error("AI API error:", error);
 
     // Fallback to local system on API errors
     return handleLocalFallback(messages, context, res);
@@ -57,26 +56,26 @@ export default async function handler(req, res) {
 async function callOpenAI(messages, context) {
   const systemPrompt = buildSystemPrompt(context);
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-      'Content-Type': 'application/json'
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: 'gpt-4-turbo-preview',
+      model: "gpt-4-turbo-preview",
       messages: [
-        { role: 'system', content: systemPrompt },
-        ...messages.map(msg => ({
-          role: msg.role === 'ai' ? 'assistant' : 'user',
-          content: msg.content
-        }))
+        { role: "system", content: systemPrompt },
+        ...messages.map((msg) => ({
+          role: msg.role === "ai" ? "assistant" : "user",
+          content: msg.content,
+        })),
       ],
       max_tokens: 2000,
       temperature: 0.7,
       presence_penalty: 0.1,
-      frequency_penalty: 0.1
-    })
+      frequency_penalty: 0.1,
+    }),
   });
 
   if (!response.ok) {
@@ -87,29 +86,29 @@ async function callOpenAI(messages, context) {
   return {
     content: data.choices[0].message.content,
     usage: data.usage,
-    function_call: data.choices[0].message.function_call
+    function_call: data.choices[0].message.function_call,
   };
 }
 
 async function callAnthropic(messages, context) {
   const systemPrompt = buildSystemPrompt(context);
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
     headers: {
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'Content-Type': 'application/json',
-      'anthropic-version': '2023-06-01'
+      "x-api-key": process.env.ANTHROPIC_API_KEY,
+      "Content-Type": "application/json",
+      "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: 'claude-3-sonnet-20240229',
+      model: "claude-3-sonnet-20240229",
       max_tokens: 1000,
       system: systemPrompt,
-      messages: messages.map(msg => ({
-        role: msg.role === 'ai' ? 'assistant' : 'user',
-        content: msg.content
-      }))
-    })
+      messages: messages.map((msg) => ({
+        role: msg.role === "ai" ? "assistant" : "user",
+        content: msg.content,
+      })),
+    }),
   });
 
   if (!response.ok) {
@@ -119,7 +118,7 @@ async function callAnthropic(messages, context) {
   const data = await response.json();
   return {
     content: data.content[0].text,
-    usage: data.usage
+    usage: data.usage,
   };
 }
 
@@ -127,30 +126,39 @@ async function callHuggingFace(messages, context) {
   const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
 
   if (!HUGGINGFACE_API_KEY) {
-    throw new Error('Hugging Face API key not configured');
+    throw new Error("Hugging Face API key not configured");
   }
 
   try {
     // Use a conversational model
-    const response = await fetch('https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${HUGGINGFACE_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        inputs: {
-          past_user_inputs: messages.filter(m => m.role === 'user').slice(-3).map(m => m.content),
-          generated_responses: messages.filter(m => m.role === 'ai').slice(-3).map(m => m.content),
-          text: messages[messages.length - 1].content
+    const response = await fetch(
+      "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${HUGGINGFACE_API_KEY}`,
+          "Content-Type": "application/json",
         },
-        parameters: {
-          max_length: 100,
-          temperature: 0.7,
-          do_sample: true
-        }
-      })
-    });
+        body: JSON.stringify({
+          inputs: {
+            past_user_inputs: messages
+              .filter((m) => m.role === "user")
+              .slice(-3)
+              .map((m) => m.content),
+            generated_responses: messages
+              .filter((m) => m.role === "ai")
+              .slice(-3)
+              .map((m) => m.content),
+            text: messages[messages.length - 1].content,
+          },
+          parameters: {
+            max_length: 100,
+            temperature: 0.7,
+            do_sample: true,
+          },
+        }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Hugging Face API error: ${response.status}`);
@@ -159,11 +167,14 @@ async function callHuggingFace(messages, context) {
     const data = await response.json();
 
     return {
-      content: data.generated_text || data[0]?.generated_text || 'I\'m processing your request...',
-      usage: null
+      content:
+        data.generated_text ||
+        data[0]?.generated_text ||
+        "I'm processing your request...",
+      usage: null,
     };
   } catch (error) {
-    console.error('Hugging Face API error:', error);
+    console.error("Hugging Face API error:", error);
     throw error;
   }
 }
@@ -173,7 +184,7 @@ function buildSystemPrompt(context) {
 
 CONTEXT INFORMATION:
 - Learned Knowledge: ${JSON.stringify(context.learnedData || {})}
-- Current Agent: ${context.currentAgent || 'general'}
+- Current Agent: ${context.currentAgent || "general"}
 - Agent Personality: ${JSON.stringify(context.agentPersonality || {})}
 - Conversation History: ${context.recentMessages?.length || 0} messages
 
@@ -196,21 +207,22 @@ Always respond naturally and intelligently, leveraging both your general knowled
 
 function handleLocalFallback(messages, context, res) {
   // Get the last user message
-  const lastUserMessage = messages.filter(m => m.role === 'user').pop();
+  const lastUserMessage = messages.filter((m) => m.role === "user").pop();
   if (!lastUserMessage) {
-    return res.status(400).json({ error: 'No user message found' });
+    return res.status(400).json({ error: "No user message found" });
   }
 
   const prompt = lastUserMessage.content.toLowerCase();
 
   // Simple local response generation
-  let response = '';
+  let response = "";
   let code = null;
 
-  if (prompt.includes('hello') || prompt.includes('hi')) {
-    response = 'Hello! I\'m your AI assistant. How can I help you with coding today?';
-  } else if (prompt.includes('button')) {
-    response = 'Here\'s a simple React button component:';
+  if (prompt.includes("hello") || prompt.includes("hi")) {
+    response =
+      "Hello! I'm your AI assistant. How can I help you with coding today?";
+  } else if (prompt.includes("button")) {
+    response = "Here's a simple React button component:";
     code = `function MyButton({ onClick, children }) {
   return (
     <button
@@ -221,8 +233,8 @@ function handleLocalFallback(messages, context, res) {
     </button>
   );
 }`;
-  } else if (prompt.includes('form')) {
-    response = 'Here\'s a basic form component:';
+  } else if (prompt.includes("form")) {
+    response = "Here's a basic form component:";
     code = `function ContactForm() {
   const [formData, setFormData] = useState({ name: '', email: '' });
 
@@ -250,13 +262,14 @@ function handleLocalFallback(messages, context, res) {
   );
 }`;
   } else {
-    response = 'I\'m here to help with coding! Try asking me to create a button, form, or component. I can also help with web scraping and learning from data.';
+    response =
+      "I'm here to help with coding! Try asking me to create a button, form, or component. I can also help with web scraping and learning from data.";
   }
 
   return res.status(200).json({
     response,
     code,
-    source: 'local',
-    fallback: true
+    source: "local",
+    fallback: true,
   });
 }

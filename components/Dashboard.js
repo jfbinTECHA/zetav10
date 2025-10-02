@@ -14,7 +14,11 @@ export default function Dashboard() {
     "Kilo Code": "idle",
   });
 
-  const [filters, setFilters] = useState({ priority: "all", agent: "all", searchTerm: "" });
+  const [filters, setFilters] = useState({
+    priority: "all",
+    agent: "all",
+    searchTerm: "",
+  });
   const [highlightOnly, setHighlightOnly] = useState(false);
   const [panicMode, setPanicMode] = useState(false);
 
@@ -41,7 +45,9 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-100 p-6">
       <Toaster position="top-right" reverseOrder={false} />
 
-      <h1 className="text-3xl font-bold text-center mb-6">🤖 Zeta AI Dashboard</h1>
+      <h1 className="text-3xl font-bold text-center mb-6">
+        🤖 Zeta AI Dashboard
+      </h1>
 
       {/* Mission Control */}
       <MissionControl
@@ -69,7 +75,9 @@ export default function Dashboard() {
         <button
           onClick={() => setPanicMode(!panicMode)}
           className={`px-4 py-2 rounded-lg text-white font-bold ${
-            panicMode ? "bg-red-600 hover:bg-red-700" : "bg-gray-600 hover:bg-gray-700"
+            panicMode
+              ? "bg-red-600 hover:bg-red-700"
+              : "bg-gray-600 hover:bg-gray-700"
           }`}
         >
           {panicMode ? "Disable Panic Mode" : "Enable Panic Mode"}

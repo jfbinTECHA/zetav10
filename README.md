@@ -26,17 +26,20 @@ A real-time command center for monitoring AI agents and managing tasks with adva
 ## 📦 Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/jfbinTECHA/zetav10.git
 cd zetav10
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -46,17 +49,20 @@ npm run dev
 ## 🎯 Usage
 
 ### Basic Operation
+
 - View real-time agent status and task activity
 - Use filters to focus on specific agents or priority levels
 - Toggle highlight-only mode to reduce clutter
 - Activate panic mode for critical situations
 
 ### Task Management
+
 - High-priority tasks trigger notifications and sound alerts
 - Click acknowledge buttons to mark tasks as handled
 - Panic mode continues until all high-priority tasks are acknowledged
 
 ### Customization
+
 - Update agent configurations in `components/AgentCard.js`
 - Modify notification sounds in `public/alert.mp3`
 - Customize styling in Tailwind CSS classes
@@ -95,6 +101,7 @@ zeta-ai-dashboard/
 ## 🔧 Configuration
 
 ### Environment Variables
+
 Create a `.env.local` file for custom configurations:
 
 ```env
@@ -103,13 +110,12 @@ NEXT_PUBLIC_VERSION=1.0.0
 ```
 
 ### Agent Configuration
+
 Modify agent settings in `components/AgentCard.js`:
 
 ```javascript
 const taskPool = {
-  Chrono: [
-    { message: "Custom task", priority: "high" }
-  ]
+  Chrono: [{ message: "Custom task", priority: "high" }],
 };
 ```
 
@@ -143,6 +149,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 For support or questions:
+
 - Create an issue on GitHub
 - Check the documentation in `ZetaManual/`
 - Email: support@zeta-ai.com

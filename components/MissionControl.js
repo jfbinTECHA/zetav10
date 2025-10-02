@@ -1,15 +1,16 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import useSWR from 'swr';
-import dynamic from 'next/dynamic';
-import AgentCard from './AgentCard';
-import toast from 'react-hot-toast';
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import useSWR from "swr";
+import dynamic from "next/dynamic";
+import AgentCard from "./AgentCard";
+import toast from "react-hot-toast";
 
-const LogsPanel = dynamic(() => import('./LogsPanel'), { ssr: false });
+const LogsPanel = dynamic(() => import("./LogsPanel"), { ssr: false });
 
-const fetcher = (...args) => fetch(...args).then(res => {
-  if (!res.ok) throw new Error('Network response was not ok');
-  return res.json();
-});
+const fetcher = (...args) =>
+  fetch(...args).then((res) => {
+    if (!res.ok) throw new Error("Network response was not ok");
+    return res.json();
+  });
 
 /**
  * MissionControl
@@ -18,7 +19,7 @@ const fetcher = (...args) => fetch(...args).then(res => {
  * - Clean WebSocket example (if you use sockets, adapt below)
  */
 
-export default function MissionControl({ apiBase = '/api' }) {
+export default function MissionControl({ apiBase = "/api" }) {
   const { data, error, mutate } = useSWR(`${apiBase}/agents`, fetcher, {
     refreshInterval: 5000,
     revalidateOnFocus: true,
@@ -31,26 +32,29 @@ export default function MissionControl({ apiBase = '/api' }) {
 
   useEffect(() => {
     if (!audioRef.current) {
-      audioRef.current = new Audio('/alert.mp3');
+      audioRef.current = new Audio("/alert.mp3");
       audioRef.current.loop = true;
       audioRef.current.volume = 0.5;
     }
   }, []);
 
-  const togglePanic = useCallback(async (value) => {
-    setPanicMode(Boolean(value));
-    if (value && soundEnabled) {
-      try {
-        await audioRef.current?.play();
-      } catch (err) {
-        console.warn('Audio blocked by browser: ', err);
-        toast('Audio blocked — using visual alerts only');
+  const togglePanic = useCallback(
+    async (value) => {
+      setPanicMode(Boolean(value));
+      if (value && soundEnabled) {
+        try {
+          await audioRef.current?.play();
+        } catch (err) {
+          console.warn("Audio blocked by browser: ", err);
+          toast("Audio blocked — using visual alerts only");
+        }
+      } else {
+        audioRef.current?.pause();
+        audioRef.current?.currentTime && (audioRef.current.currentTime = 0);
       }
-    } else {
-      audioRef.current?.pause();
-      audioRef.current?.currentTime && (audioRef.current.currentTime = 0);
-    }
-  }, [soundEnabled]);
+    },
+    [soundEnabled]
+  );
 
   // Example WebSocket connection skeleton (optional)
   useEffect(() => {
@@ -64,7 +68,9 @@ export default function MissionControl({ apiBase = '/api' }) {
   }, [mutate]);
 
   if (error) {
-    return <div className="p-4">Failed to load agents: {String(error.message)}</div>;
+    return (
+      <div className="p-4">Failed to load agents: {String(error.message)}</div>
+    );
   }
 
   const agents = Array.isArray(data?.agents) ? data.agents : [];
@@ -72,14 +78,14 @@ export default function MissionControl({ apiBase = '/api' }) {
   const handleAcknowledge = async (agent) => {
     try {
       await fetch(`${apiBase}/acknowledge`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ agentId: agent.id || agent.name }),
       });
-      toast.success(`Acknowledged ${agent.name || 'agent'}`);
+      toast.success(`Acknowledged ${agent.name || "agent"}`);
       mutate(); // refresh
     } catch (err) {
-      toast.error('Failed to acknowledge');
+      toast.error("Failed to acknowledge");
     }
   };
 
@@ -99,17 +105,25 @@ export default function MissionControl({ apiBase = '/api' }) {
           <button
             onClick={() => togglePanic(!panicMode)}
             aria-pressed={panicMode}
-            className={`px-3 py-1 rounded ${panicMode ? 'bg-red-600 text-white' : 'bg-gray-200'}`}
+            className={`px-3 py-1 rounded ${
+              panicMode ? "bg-red-600 text-white" : "bg-gray-200"
+            }`}
           >
-            {panicMode ? 'Disable Panic' : 'Enable Panic'}
+            {panicMode ? "Disable Panic" : "Enable Panic"}
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {agents.length === 0 && <div className="text-gray-500">No agents found</div>}
-        {agents.map(agent => (
-          <AgentCard key={agent.id || agent.name} agent={agent} onAcknowledge={handleAcknowledge} />
+        {agents.length === 0 && (
+          <div className="text-gray-500">No agents found</div>
+        )}
+        {agents.map((agent) => (
+          <AgentCard
+            key={agent.id || agent.name}
+            agent={agent}
+            onAcknowledge={handleAcknowledge}
+          />
         ))}
       </div>
 

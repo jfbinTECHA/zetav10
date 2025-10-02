@@ -6,7 +6,9 @@ export default function HelpPanel() {
         <li>Click on an Agent to view details.</li>
         <li>Active = currently analyzing / Idle = waiting for task.</li>
         <li>Use the dashboard to assign new workloads.</li>
-        <li>For issues, check the logs in <code>/logs</code>.</li>
+        <li>
+          For issues, check the logs in <code>/logs</code>.
+        </li>
       </ul>
     </div>
   );
