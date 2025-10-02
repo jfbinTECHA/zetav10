@@ -2,13 +2,62 @@ import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useLogs } from "./LogsContext";
 
-const highPrioritySound = new Audio("/alert.mp3");
-highPrioritySound.volume = 0.5; // 50% volume
-highPrioritySound.loop = false;  // play once
+const getRealTimeTasks = async (agentName) => {
+  const sources = {
+    Chrono: ['https://www.healthcareitnews.com/', 'https://www.modernhealthcare.com/'],
+    Vega: ['https://www.uxdesign.cc/', 'https://uxmag.com/'],
+    Aria: ['https://www.nature.com/', 'https://www.sciencedirect.com/'],
+    "Kilo Code": ['https://arxiv.org/', 'https://www.technologyreview.com/']
+  };
+
+  const agentSources = sources[agentName] || [];
+  if (agentSources.length === 0) return [];
+
+  try {
+    // Try to scrape one random source for real-time content
+    const randomSource = agentSources[Math.floor(Math.random() * agentSources.length)];
+    const response = await fetch('/api/scrape', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: randomSource })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.text) {
+        // Extract potential task ideas from scraped content
+        const words = data.text.toLowerCase().split(/\s+/);
+        const keywords = {
+          Chrono: ['health', 'medical', 'patient', 'treatment', 'diagnosis', 'clinical'],
+          Vega: ['design', 'user', 'interface', 'ux', 'ui', 'experience'],
+          Aria: ['research', 'study', 'analysis', 'data', 'academic', 'publication'],
+          "Kilo Code": ['ai', 'machine', 'learning', 'algorithm', 'model', 'neural']
+        };
+
+        const agentKeywords = keywords[agentName] || [];
+        const foundKeywords = agentKeywords.filter(keyword =>
+          words.some(word => word.includes(keyword))
+        );
+
+        if (foundKeywords.length > 0) {
+          return [{
+            message: `Analyzed current web content about ${foundKeywords.join(', ')} and identified emerging trends`,
+            priority: 'high'
+          }];
+        }
+      }
+    }
+  } catch (error) {
+    console.log('Real-time learning error:', error);
+  }
+
+  return [];
+};
 
 export default function AgentCard({ name, role, onStatusChange, filters, highlightOnly, panicMode }) {
   const [status, setStatus] = useState("idle");
   const [expanded, setExpanded] = useState(false);
+  const [isLearning, setIsLearning] = useState(false);
   const { addLog, agentLogs, acknowledgeLog } = useLogs();
 
   const panicFlash = panicMode && agentLogs[name]?.some(log => log.priority === "high");
@@ -60,12 +109,39 @@ export default function AgentCard({ name, role, onStatusChange, filters, highlig
   useEffect(() => {
     if (status !== "active") return;
 
+    const highPrioritySound = new Audio("/alert.mp3");
+    highPrioritySound.volume = 0.5; // 50% volume
+    highPrioritySound.loop = false;  // play once
+
     const randomDelay = () => Math.floor(Math.random() * 5000) + 3000;
     let timeoutId;
 
-    const generateTask = () => {
-      const tasks = taskPool[name] || taskPool.Default;
-      const task = tasks[Math.floor(Math.random() * tasks.length)];
+    const generateTask = async () => {
+      setIsLearning(true);
+      let task;
+
+      try {
+        // Try to get real-time tasks from web first
+        const realTimeTasks = await getRealTimeTasks(name);
+
+        if (realTimeTasks.length > 0 && Math.random() < 0.3) { // 30% chance to use real-time task
+          task = realTimeTasks[0];
+          // Mark as real-time learned
+          task.message += ' (Real-time web learning)';
+        } else {
+          // Fall back to simulated tasks
+          const tasks = taskPool[name] || taskPool.Default;
+          task = tasks[Math.floor(Math.random() * tasks.length)];
+        }
+      } catch (error) {
+        console.log('Real-time learning failed, using simulation:', error);
+        // Fall back to simulated tasks on error
+        const tasks = taskPool[name] || taskPool.Default;
+        task = tasks[Math.floor(Math.random() * tasks.length)];
+      } finally {
+        setIsLearning(false);
+      }
+
       addLog({
         message: task.message,
         priority: task.priority,
@@ -105,8 +181,11 @@ export default function AgentCard({ name, role, onStatusChange, filters, highlig
           <span
             className={`h-3 w-3 rounded-full ${
               status === "active" ? "bg-green-500" : "bg-red-500"
-            }`}
+            } ${isLearning ? "animate-pulse" : ""}`}
           ></span>
+          {isLearning && (
+            <span className="text-xs text-blue-600 animate-pulse">🌐 Learning</span>
+          )}
           <div>
             <h2 className="text-xl font-semibold">{name}</h2>
             <p className="text-gray-600">{role}</p>
@@ -182,7 +261,7 @@ export default function AgentCard({ name, role, onStatusChange, filters, highlig
                           ? "bg-orange-200 text-orange-800"
                           : "bg-gray-200 text-gray-700"
                       }`}>
-                        {log.priority.toUpperCase()}
+                        {log.priority ? log.priority.toUpperCase() : 'LOW'}
                       </span>
                       <span className="flex-1 ml-1">{log.message}</span>
                       {log.priority === "high" && !log.acknowledged && (

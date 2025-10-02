@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Toaster } from "react-hot-toast";
 import MissionControl from "./MissionControl";
 import AgentCard from "./AgentCard";
+import DataScraper from "./DataScraper";
+import AICodeChat from "./AICodeChat";
 
 export default function Dashboard() {
   const [agentStatuses, setAgentStatuses] = useState({
@@ -79,6 +81,16 @@ export default function Dashboard() {
             panicMode={panicMode}
           />
         ))}
+      </div>
+
+      {/* Data Scraper */}
+      <div className="mt-8">
+        <DataScraper />
+      </div>
+
+      {/* AI Code Chat */}
+      <div className="mt-8">
+        <AICodeChat />
       </div>
     </div>
   );
