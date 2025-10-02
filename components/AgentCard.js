@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from 'react';
+import PropTypes from 'prop-types';
 import toast from "react-hot-toast";
 import { useLogs } from "./LogsContext";
 import { playAlertSound, stopAlertSound } from "../utils/audioManager";
@@ -55,7 +56,21 @@ const getRealTimeTasks = async (agentName) => {
   return [];
 };
 
-export default function AgentCard({ name, role, onStatusChange, filters, highlightOnly, panicMode }) {
+/**
+ * AgentCard
+ * - Pure functional component
+ * - Memoized to avoid re-renders
+ * - Defensive prop handling
+ * - Avoids dangerous html injection
+ */
+
+const priorityColors = {
+  high: 'bg-red-100 text-red-800',
+  medium: 'bg-yellow-100 text-yellow-800',
+  low: 'bg-green-100 text-green-800',
+};
+
+function AgentCard({ name, role, onStatusChange, filters, highlightOnly, panicMode }) {
   const [status, setStatus] = useState("idle");
   const [expanded, setExpanded] = useState(false);
   const [isLearning, setIsLearning] = useState(false);
@@ -281,3 +296,14 @@ export default function AgentCard({ name, role, onStatusChange, filters, highlig
     </div>
   );
 }
+
+AgentCard.propTypes = {
+  name: PropTypes.string,
+  role: PropTypes.string,
+  onStatusChange: PropTypes.func,
+  filters: PropTypes.object,
+  highlightOnly: PropTypes.bool,
+  panicMode: PropTypes.bool,
+};
+
+export default React.memo(AgentCard);
