@@ -27,8 +27,8 @@ A real-time command center for monitoring AI agents and managing tasks with adva
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/zeta-ai-dashboard.git
-cd zeta-ai-dashboard
+git clone https://github.com/jfbinTECHA/zetav10.git
+cd zetav10
 ```
 
 2. Install dependencies:
