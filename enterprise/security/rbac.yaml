@@ -1,0 +1,85 @@
+# ServiceAccount for QA Dashboard
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: qa-dashboard-sa
+  labels:
+    app.kubernetes.io/name: qa-dashboard
+    app.kubernetes.io/component: rbac
+automountServiceAccountToken: false
+
+---
+# Role for QA Dashboard operations
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: qa-dashboard-role
+  labels:
+    app.kubernetes.io/name: qa-dashboard
+    app.kubernetes.io/component: rbac
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "endpoints"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["monitoring.coreos.com"]
+  resources: ["servicemonitors", "prometheusrules"]
+  verbs: ["get", "list", "create", "update", "patch", "delete"]
+- apiGroups: ["networking.istio.io"]
+  resources: ["virtualservices", "destinationrules", "peerauthentications"]
+  verbs: ["get", "list", "watch"]
+
+---
+# RoleBinding for QA Dashboard
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: qa-dashboard-rolebinding
+  labels:
+    app.kubernetes.io/name: qa-dashboard
+    app.kubernetes.io/component: rbac
+subjects:
+- kind: ServiceAccount
+  name: qa-dashboard-sa
+  namespace: qa-monitoring
+roleRef:
+  kind: Role
+  name: qa-dashboard-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# ClusterRole for cross-namespace monitoring access
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: qa-dashboard-cluster-role
+  labels:
+    app.kubernetes.io/name: qa-dashboard
+    app.kubernetes.io/component: rbac
+rules:
+- apiGroups: ["monitoring.coreos.com"]
+  resources: ["servicemonitors", "prometheusrules"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["networking.k8s.io"]
+  resources: ["networkpolicies"]
+  verbs: ["get", "list", "watch"]
+
+---
+# ClusterRoleBinding for monitoring access
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: qa-dashboard-cluster-rolebinding
+  labels:
+    app.kubernetes.io/name: qa-dashboard
+    app.kubernetes.io/component: rbac
+subjects:
+- kind: ServiceAccount
+  name: qa-dashboard-sa
+  namespace: qa-monitoring
+roleRef:
+  kind: ClusterRole
+  name: qa-dashboard-cluster-role
+  apiGroup: rbac.authorization.k8s.io

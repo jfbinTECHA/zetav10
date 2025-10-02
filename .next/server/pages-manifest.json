@@ -1,13 +1,1 @@
-{
-  "/_app": "pages/_app.js",
-  "/_error": "pages/_error.js",
-  "/_document": "pages/_document.js",
-  "/": "pages/index.js",
-  "/api/agents": "pages/api/agents.js",
-  "/api/logs": "pages/api/logs.js",
-  "/api/ai-chat": "pages/api/ai-chat.js",
-  "/api/acknowledge": "pages/api/acknowledge.js",
-  "/api/plugins": "pages/api/plugins.js",
-  "/api/transformers": "pages/api/transformers.js",
-  "/api/learning-models": "pages/api/learning-models.js"
-}
+{"/_app":"pages/_app.js","/_error":"pages/_error.js","/api/acknowledge":"pages/api/acknowledge.js","/api/agents":"pages/api/agents.js","/api/ai-chat":"pages/api/ai-chat.js","/api/learning-models":"pages/api/learning-models.js","/api/logs":"pages/api/logs.js","/api/metrics":"pages/api/metrics.js","/api/plugins":"pages/api/plugins.js","/api/qa-results":"pages/api/qa-results.js","/api/scrape":"pages/api/scrape.js","/api/transformers":"pages/api/transformers.js","/api/users/[id]":"pages/api/users/[id].js","/api/users":"pages/api/users.js","/api/workflow/config":"pages/api/workflow/config.js","/api/workflow/control":"pages/api/workflow/control.js","/api/workflow/logs":"pages/api/workflow/logs.js","/api/workflow/status":"pages/api/workflow/status.js","/":"pages/index.html","/api/workflow/images":"pages/api/workflow/images.js","/_document":"pages/_document.js","/404":"pages/404.html"}

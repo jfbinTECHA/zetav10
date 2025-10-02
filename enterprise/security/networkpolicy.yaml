@@ -1,0 +1,109 @@
+# NetworkPolicy for QA Dashboard - restrict ingress/egress
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: qa-dashboard-network-policy
+  labels:
+    app.kubernetes.io/name: qa-dashboard
+    app.kubernetes.io/component: security
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: qa-dashboard
+  policyTypes:
+  - Ingress
+  - Egress
+
+  # Ingress rules - only allow necessary traffic
+  ingress:
+  # Allow traffic from Istio ingress gateway
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          istio-injection: enabled
+      podSelector:
+        matchLabels:
+          istio: ingressgateway
+    ports:
+    - protocol: TCP
+      port: 5000
+
+  # Allow traffic from Prometheus for metrics scraping
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: prometheus
+    ports:
+    - protocol: TCP
+      port: 5000
+
+  # Allow traffic from same namespace (for service communication)
+  - from:
+    - podSelector: {}
+    ports:
+    - protocol: TCP
+      port: 5000
+
+  # Egress rules - restrict external connections
+  egress:
+  # Allow DNS resolution
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+
+  # Allow HTTPS outbound (for external API calls, notifications)
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+
+  # Allow communication to monitoring namespace
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 9090  # Prometheus
+    - protocol: TCP
+      port: 3000  # Grafana
+
+  # Allow communication within same namespace
+  - to:
+    - podSelector: {}
+    ports:
+    - protocol: TCP
+
+---
+# NetworkPolicy for monitoring namespace - restrict access to QA metrics
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: qa-monitoring-namespace-policy
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: qa-dashboard
+    app.kubernetes.io/component: security
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus
+  policyTypes:
+  - Ingress
+
+  ingress:
+  # Only allow QA dashboard to access Prometheus for metrics
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: qa-monitoring
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: qa-dashboard
+    ports:
+    - protocol: TCP
+      port: 9090

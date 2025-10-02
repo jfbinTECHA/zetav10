@@ -1,0 +1,148 @@
+# Drift Detection Configuration for ArgoCD
+# This file contains configurations to enhance drift detection and correction
+
+---
+# ConfigMap for ArgoCD notification templates (optional)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-notifications-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: qa-dashboard
+    app.kubernetes.io/component: gitops
+data:
+  # Slack notification template for QA platform
+  template.qa-platform-drift: |
+    email:
+      subject: "QA Platform Drift Detected - {{.app.metadata.name}}"
+    slack:
+      attachments: |
+        [{
+          "title": "QA Platform Drift Detected",
+          "title_link": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+          "color": "warning",
+          "fields": [
+            {
+              "title": "Application",
+              "value": "{{.app.metadata.name}}",
+              "short": true
+            },
+            {
+              "title": "Environment",
+              "value": "{{.app.metadata.labels.environment}}",
+              "short": true
+            }
+          ]
+        }]
+
+---
+# ArgoCD Application with enhanced drift detection
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qa-platform-drift-monitor
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: qa-dashboard
+    app.kubernetes.io/component: gitops
+  annotations:
+    # Enable enhanced drift detection
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    argocd.argoproj.io/sync-options: PruneLast=true
+spec:
+  project: qa-platform
+  source:
+    repoURL: https://github.com/your-org/qa-platform
+    path: helm-chart
+    targetRevision: HEAD
+    # Enable drift detection on resource modifications
+    kustomize:
+      commonAnnotations:
+        argocd.argoproj.io/drift-detection: "true"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: qa-monitoring
+  syncPolicy:
+    automated:
+      # Enhanced self-healing for drift correction
+      selfHeal: true
+      prune: true
+    # Retry configuration for failed syncs
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 5m
+
+---
+# PrometheusRule for GitOps monitoring
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: qa-platform-gitops-alerts
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: qa-dashboard
+    app.kubernetes.io/component: gitops
+spec:
+  groups:
+  - name: qa-platform-gitops
+    rules:
+    - alert: ArgoCDAppOutOfSync
+      expr: argocd_app_info{sync_status="OutOfSync", app=~"qa-platform.*"} > 0
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "ArgoCD application out of sync"
+        description: "QA Platform application {{ $labels.app }} has been out of sync for more than 10 minutes."
+
+    - alert: ArgoCDAppSyncFailed
+      expr: increase(argocd_app_sync_total{phase="Error"}[5m]) > 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "ArgoCD sync failed"
+        description: "QA Platform application sync failed for {{ $labels.app }}."
+
+    - alert: ArgoCDAppDegraded
+      expr: argocd_app_info{health_status="Degraded", app=~"qa-platform.*"} > 0
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "ArgoCD application degraded"
+        description: "QA Platform application {{ $labels.app }} is in degraded state."
+
+---
+# NetworkPolicy for ArgoCD to GitOps repo (if needed)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: argocd-gitops-access
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: qa-dashboard
+    app.kubernetes.io/component: gitops
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-repo-server
+  policyTypes:
+  - Egress
+  egress:
+  # Allow HTTPS to GitHub/GitLab
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+    ports:
+    - protocol: TCP
+      port: 443
+  # Allow DNS
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53

@@ -32,19 +32,63 @@ git clone https://github.com/jfbinTECHA/zetav10.git
 cd zetav10
 ```
 
-2. Install dependencies:
+2. Copy environment variables:
+
+```bash
+cp .env.example .env
+# Edit .env with your notification settings
+```
+
+3. Install dependencies:
 
 ```bash
 npm install
 ```
 
-3. Start the development server:
+4. Start the development server:
 
 ```bash
 npm run dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 🔄 Workflow & Kilo Code Integration
+
+ZetaV10 includes a built-in workflow runner to automate updates, backups, and learning cycles without requiring the Kilo CLI.
+
+### Running the Workflow
+
+- **Dry-run** (safe simulation): `node run_workflow.js --dry`
+- **Real run** (updates and commits): `node run_workflow.js`
+
+### Features
+
+- Automatic backups of updated files
+- Lint, format, and test checks
+- Failure-only notifications (Slack, email, desktop)
+- Rollback on failures
+- Summary email reports
+- Dashboard monitoring of all runs
+
+### Dashboard
+
+Start the monitoring dashboard:
+
+```bash
+cd dashboard
+npm install
+npm start
+```
+
+Open http://localhost:3000 to view run history, logs, and re-run failed updates.
+
+### Troubleshooting
+
+- If workflow fails, check logs/ for details
+- Use dashboard to re-run failed updates
+- Ensure .env has correct notification credentials
+- Dry-run first to test without committing
 
 ## 🎯 Usage
 

@@ -1,0 +1,75 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: qa-dashboard-traffic
+  labels:
+    app.kubernetes.io/name: qa-dashboard
+    app.kubernetes.io/component: istio
+spec:
+  hosts:
+  - qa-dashboard.qa-monitoring.svc.cluster.local
+  http:
+  # Metrics endpoint - high priority for monitoring
+  - match:
+    - uri:
+        prefix: "/metrics"
+    route:
+    - destination:
+        host: qa-dashboard.qa-monitoring.svc.cluster.local
+        port:
+          number: 5000
+    # Enable retries for metrics collection
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+    # Circuit breaker for metrics
+    trafficPolicy:
+      outlierDetection:
+        consecutive5xxErrors: 3
+        interval: 10s
+        baseEjectionTime: 30s
+
+  # API endpoints
+  - match:
+    - uri:
+        prefix: "/api"
+    route:
+    - destination:
+        host: qa-dashboard.qa-monitoring.svc.cluster.local
+        port:
+          number: 5000
+    # Rate limiting for API calls
+    trafficPolicy:
+      rateLimit:
+        local:
+          http:
+            requestRateLimit:
+              requestsPerUnit: 100
+              unit: MINUTE
+
+  # Web dashboard - authenticated users
+  - match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: qa-dashboard.qa-monitoring.svc.cluster.local
+        port:
+          number: 5000
+    # Session affinity for dashboard
+    trafficPolicy:
+      loadBalancer:
+        consistentHash:
+          httpCookie:
+            name: qa-session
+            ttl: 300s
+
+  # Health checks - allow without authentication
+  - match:
+    - uri:
+        exact: "/health"
+    route:
+    - destination:
+        host: qa-dashboard.qa-monitoring.svc.cluster.local
+        port:
+          number: 5000

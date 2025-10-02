@@ -1,0 +1,39 @@
+{{- if .Values.monitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "qa-dashboard.fullname" . }}-alerts
+  labels:
+    {{- include "qa-dashboard.labels" . | nindent 4 }}
+    app.kubernetes.io/component: monitoring
+spec:
+  groups:
+  - name: qa-dashboard
+    rules:
+    - alert: QADashboardDown
+      expr: up{job="{{ include "qa-dashboard.fullname" . }}-monitor"} == 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "QA Dashboard is down"
+        description: "QA Dashboard has been down for more than 5 minutes."
+
+    - alert: QAHighFailureRate
+      expr: rate(qa_tests_total{status="fail"}[5m]) / rate(qa_tests_total{status="total"}[5m]) > 0.5
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High QA test failure rate detected"
+        description: "QA test failure rate is above 50% for the last 10 minutes."
+
+    - alert: QANoTestsExecuted
+      expr: increase(qa_tests_total[10m]) == 0
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: "No QA tests executed recently"
+        description: "No QA tests have been executed in the last 15 minutes."
+{{- end }}

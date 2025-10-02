@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  qa-dashboard:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - API_BASE_URL=http://host.docker.internal:3000
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      - DASHBOARD_USERNAME=${DASHBOARD_USERNAME:-admin}
+      - DASHBOARD_PASSWORD=${DASHBOARD_PASSWORD:-password}
+    volumes:
+      - ./logs:/app/logs
+      - ./backup:/app/backup
+      - ./kilo_qa_checklist.json:/app/kilo_qa_checklist.json:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/qa-data"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Next.js dashboard in container
+  nextjs-dashboard:
+    image: node:18-alpine
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm run dev"
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped

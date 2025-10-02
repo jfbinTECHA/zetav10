@@ -1,0 +1,197 @@
+---
+# Example 1: Basic API Health Check
+apiVersion: qa.company.com/v1
+kind: QATest
+metadata:
+  name: api-health-check
+  namespace: qa-monitoring
+spec:
+  endpoint: "https://api.company.com/health"
+  method: GET
+  expectedStatus: 200
+  timeout: "10s"
+  retries: 2
+  interval: "30s"
+  notifications:
+  - type: slack
+    channel: "#qa-alerts"
+
+---
+# Example 2: User Authentication Test
+apiVersion: qa.company.com/v1
+kind: QATest
+metadata:
+  name: user-auth-test
+  namespace: qa-monitoring
+spec:
+  endpoint: "https://api.company.com/auth/login"
+  method: POST
+  headers:
+    Content-Type: "application/json"
+  body: '{"username":"testuser","password":"testpass"}'
+  expectedStatus: 200
+  expectedResponse: '"token":'
+  timeout: "15s"
+  retries: 1
+  interval: "5m"
+
+---
+# Example 3: QA Suite for Critical APIs
+apiVersion: qa.company.com/v1
+kind: QASuite
+metadata:
+  name: critical-api-suite
+  namespace: qa-monitoring
+spec:
+  tests:
+  - api-health-check
+  - user-auth-test
+  - payment-api-test
+  - inventory-api-test
+  parallel: true
+  failFast: false
+  timeout: "5m"
+  schedule: "*/10 * * * *"
+  preconditions:
+  - type: http
+    endpoint: "https://api.company.com/health"
+    timeout: "30s"
+
+---
+# Example 4: Scheduled QA Execution
+apiVersion: qa.company.com/v1
+kind: QASchedule
+metadata:
+  name: nightly-regression-suite
+  namespace: qa-monitoring
+spec:
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  target:
+    kind: QASuite
+    name: critical-api-suite
+    namespace: qa-monitoring
+  timezone: "America/New_York"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 3600
+
+---
+# Example 5: Load Testing Suite
+apiVersion: qa.company.com/v1
+kind: QASuite
+metadata:
+  name: load-test-suite
+  namespace: qa-monitoring
+spec:
+  tests:
+  - api-health-check
+  - user-auth-test
+  parallel: true
+  failFast: false
+  timeout: "30m"
+  environment:
+    LOAD_TEST: "true"
+    CONCURRENT_USERS: "100"
+    TEST_DURATION: "10m"
+
+---
+# Example 6: Database Connectivity Test
+apiVersion: qa.company.com/v1
+kind: QATest
+metadata:
+  name: database-connectivity-test
+  namespace: qa-monitoring
+spec:
+  endpoint: "https://api.company.com/db/health"
+  method: GET
+  expectedStatus: 200
+  expectedResponse: '"status":"healthy"'
+  timeout: "5s"
+  retries: 3
+  interval: "1m"
+  notifications:
+  - type: email
+    recipients:
+    - "dba@company.com"
+    - "devops@company.com"
+
+---
+# Example 7: Third-party Integration Test
+apiVersion: qa.company.com/v1
+kind: QATest
+metadata:
+  name: payment-gateway-test
+  namespace: qa-monitoring
+spec:
+  endpoint: "https://api.stripe.com/v1/charges"
+  method: GET
+  headers:
+    Authorization: "Bearer sk_test_..."
+  expectedStatus: 200
+  timeout: "10s"
+  retries: 2
+  interval: "15m"
+
+---
+# Example 8: Microservice Dependency Check
+apiVersion: qa.company.com/v1
+kind: QASuite
+metadata:
+  name: microservice-dependencies
+  namespace: qa-monitoring
+spec:
+  tests:
+  - user-service-health
+  - order-service-health
+  - inventory-service-health
+  - notification-service-health
+  parallel: true
+  failFast: true
+  timeout: "2m"
+  preconditions:
+  - type: dns
+    endpoint: "user-service.qa-monitoring.svc.cluster.local"
+  - type: dns
+    endpoint: "order-service.qa-monitoring.svc.cluster.local"
+
+---
+# Example 9: End-to-End User Journey
+apiVersion: qa.company.com/v1
+kind: QASuite
+metadata:
+  name: user-journey-test
+  namespace: qa-monitoring
+spec:
+  tests:
+  - user-registration
+  - user-login
+  - product-search
+  - add-to-cart
+  - checkout-process
+  - order-confirmation
+  parallel: false  # Sequential for user journey
+  failFast: true   # Stop on first failure
+  timeout: "10m"
+  schedule: "*/30 * * * *"  # Every 30 minutes
+
+---
+# Example 10: Performance Monitoring Test
+apiVersion: qa.company.com/v1
+kind: QATest
+metadata:
+  name: api-performance-test
+  namespace: qa-monitoring
+spec:
+  endpoint: "https://api.company.com/users"
+  method: GET
+  expectedStatus: 200
+  timeout: "2s"  # Performance requirement
+  retries: 0
+  interval: "5m"
+  notifications:
+  - type: webhook
+    url: "https://monitoring.company.com/webhook"

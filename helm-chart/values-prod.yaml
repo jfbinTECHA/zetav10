@@ -1,0 +1,116 @@
+# Production environment overrides
+# Full security, high availability, enterprise-grade
+
+# Application configuration
+replicaCount: 3
+
+image:
+  tag: "v1.0.0"  # Pinned version for production
+
+# Full resources for production workload
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 200m
+    memory: 512Mi
+
+# Full monitoring and alerting
+monitoring:
+  enabled: true
+  serviceMonitor:
+    interval: 15s  # More frequent in production
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Full Istio service mesh
+istio:
+  enabled: true
+  peerAuthentication:
+    mtls:
+      mode: STRICT
+
+# Maximum security
+security:
+  networkPolicy:
+    enabled: true
+  podSecurityContext:
+    enabled: true
+  securityContext:
+    enabled: true
+  serviceAccount:
+    create: true
+    automountServiceAccountToken: false
+
+# Full high availability
+highAvailability:
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 2  # Ensure 2 pods always available
+  antiAffinity:
+    enabled: true
+
+# Production-specific settings
+env:
+  REFRESH_INTERVAL: "30"  # Standard production frequency
+  REQUIRE_AUTH: "true"   # Mandatory authentication
+  SECRET_KEY: "change-this-in-production-with-strong-key"
+
+# Extended backup retention
+backup_count: 14  # 2 weeks of backups
+
+# Production ingress with TLS
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+  hosts:
+    - host: qa.company.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: qa-dashboard-tls
+      hosts:
+        - qa.company.com
+
+# Production node affinity
+nodeSelector:
+  environment: production
+  team: qa
+
+tolerations:
+  - key: "dedicated"
+    operator: "Equal"
+    value: "qa"
+    effect: "NoSchedule"
+
+affinity:
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        preference:
+          matchExpressions:
+            - key: team
+              operator: In
+              values:
+                - qa
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: qa-dashboard
+          topologyKey: kubernetes.io/hostname

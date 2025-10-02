@@ -1,0 +1,48 @@
+# Development environment overrides
+# Lightweight, fast iteration, minimal security
+
+# Application configuration
+replicaCount: 1
+
+image:
+  tag: "latest"
+
+# Reduced resources for dev
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 128Mi
+
+# Minimal monitoring
+monitoring:
+  enabled: true
+
+autoscaling:
+  enabled: false
+
+# Relaxed security for development
+istio:
+  enabled: false
+
+security:
+  networkPolicy:
+    enabled: false
+  podSecurityContext:
+    enabled: false
+  securityContext:
+    enabled: false
+
+highAvailability:
+  podDisruptionBudget:
+    enabled: false
+
+# Development-specific settings
+env:
+  REFRESH_INTERVAL: "5"  # Faster updates for development
+  REQUIRE_AUTH: "false"  # No auth in dev
+
+# Smaller backup retention
+backup_count: 3

@@ -1,0 +1,92 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "QA Dashboard - Overview",
+    "tags": ["qa", "monitoring", "testing"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Test Results Overview",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "qa_tests_total",
+            "legendFormat": "{{status}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "red", "value": 80}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Test Pass/Fail Rate",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "qa_tests_total",
+            "legendFormat": "{{status}}"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Test Trends Over Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(qa_tests_total[5m])",
+            "legendFormat": "{{status}} tests per second"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "WebSocket Connections",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "qa_websocket_connections",
+            "legendFormat": "Active connections"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Service Health",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "up{job=\"qa-dashboard-monitor\"}",
+            "legendFormat": "{{instance}}"
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": []
+    },
+    "refresh": "30s",
+    "schemaVersion": 27,
+    "version": 0,
+    "links": []
+  }
+}

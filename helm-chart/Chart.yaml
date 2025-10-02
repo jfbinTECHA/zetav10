@@ -1,0 +1,20 @@
+apiVersion: v2
+name: qa-dashboard
+description: Enterprise QA Monitoring Dashboard with Real-Time Testing
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - qa
+  - monitoring
+  - testing
+  - dashboard
+  - websocket
+  - api-testing
+home: https://github.com/your-org/qa-dashboard
+sources:
+  - https://github.com/your-org/qa-dashboard
+maintainers:
+  - name: QA Team
+    email: qa@yourcompany.com
+dependencies: []

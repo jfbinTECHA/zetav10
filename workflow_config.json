@@ -1,0 +1,47 @@
+{
+  "dry_run": true,
+  "log_dir": "logs",
+  "max_logs": 30,
+  "backup_count": 5,
+  "files_to_update": [
+    "components/AgentCard.js",
+    "components/MissionControl.js",
+    "components/LogsPanel.js",
+    "pages/index.js",
+    "package.json"
+  ],
+  "dependencies": {
+    "production": [
+      "swr",
+      "react-window",
+      "react-hot-toast",
+      "prop-types",
+      "dompurify",
+      "nodemailer"
+    ],
+    "development": [
+      "eslint",
+      "prettier",
+      "husky",
+      "jest",
+      "@testing-library/react",
+      "axios"
+    ]
+  },
+  "file_replacements": {
+    "components/AgentCard.js": {
+      "source": "url",
+      "url": "https://example.com/updated/AgentCard.js"
+    },
+    "components/MissionControl.js": {
+      "source": "inline",
+      "content": "// Updated MissionControl component\nconsole.log('Updated');"
+    }
+  },
+  "retry_attempts": 3,
+  "retry_delay": 5,
+  "hooks": {
+    "pre_execution": "scripts/pre_hook.sh",
+    "post_execution": "scripts/post_hook.sh"
+  }
+}

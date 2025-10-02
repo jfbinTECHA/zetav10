@@ -1,0 +1,42 @@
+{
+  "pass_rate_history": [
+    {"timestamp": "2025-10-02T19:00:00Z", "pass_rate": 75.0, "total_tests": 20, "passed": 15, "failed": 5},
+    {"timestamp": "2025-10-02T19:05:00Z", "pass_rate": 78.3, "total_tests": 23, "passed": 18, "failed": 5},
+    {"timestamp": "2025-10-02T19:10:00Z", "pass_rate": 80.0, "total_tests": 20, "passed": 16, "failed": 4},
+    {"timestamp": "2025-10-02T19:15:00Z", "pass_rate": 81.8, "total_tests": 22, "passed": 18, "failed": 4},
+    {"timestamp": "2025-10-02T19:20:00Z", "pass_rate": 82.6, "total_tests": 23, "passed": 19, "failed": 4},
+    {"timestamp": "2025-10-02T19:25:00Z", "pass_rate": 82.6, "total_tests": 23, "passed": 19, "failed": 4}
+  ],
+  "module_trends": {
+    "Core Dashboard": [
+      {"timestamp": "2025-10-02T19:00:00Z", "pass_rate": 100.0},
+      {"timestamp": "2025-10-02T19:05:00Z", "pass_rate": 100.0},
+      {"timestamp": "2025-10-02T19:10:00Z", "pass_rate": 100.0},
+      {"timestamp": "2025-10-02T19:15:00Z", "pass_rate": 100.0},
+      {"timestamp": "2025-10-02T19:20:00Z", "pass_rate": 100.0},
+      {"timestamp": "2025-10-02T19:25:00Z", "pass_rate": 100.0}
+    ],
+    "User Management": [
+      {"timestamp": "2025-10-02T19:00:00Z", "pass_rate": 75.0},
+      {"timestamp": "2025-10-02T19:05:00Z", "pass_rate": 75.0},
+      {"timestamp": "2025-10-02T19:10:00Z", "pass_rate": 75.0},
+      {"timestamp": "2025-10-02T19:15:00Z", "pass_rate": 75.0},
+      {"timestamp": "2025-10-02T19:20:00Z", "pass_rate": 75.0},
+      {"timestamp": "2025-10-02T19:25:00Z", "pass_rate": 75.0}
+    ],
+    "Data Visualization": [
+      {"timestamp": "2025-10-02T19:00:00Z", "pass_rate": 100.0},
+      {"timestamp": "2025-10-02T19:05:00Z", "pass_rate": 100.0},
+      {"timestamp": "2025-10-02T19:10:00Z", "pass_rate": 100.0},
+      {"timestamp": "2025-10-02T19:15:00Z", "pass_rate": 100.0},
+      {"timestamp": "2025-10-02T19:20:00Z", "pass_rate": 100.0},
+      {"timestamp": "2025-10-02T19:25:00Z", "pass_rate": 100.0}
+    ]
+  },
+  "trend_analysis": {
+    "overall_trend": "improving",
+    "predicted_next_rate": 84.2,
+    "confidence": 0.85,
+    "regression_coefficient": 0.023
+  }
+}

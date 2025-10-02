@@ -1,0 +1,44 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: qa-dashboard-mtls-policy
+  labels:
+    app.kubernetes.io/name: qa-dashboard
+    app.kubernetes.io/component: istio
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: qa-dashboard
+  mtls:
+    mode: STRICT
+
+---
+# PeerAuthentication for namespace-wide mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: qa-namespace-mtls
+  namespace: qa-monitoring
+  labels:
+    app.kubernetes.io/name: qa-dashboard
+    app.kubernetes.io/component: istio
+spec:
+  mtls:
+    mode: PERMISSIVE  # Allow both mTLS and plain traffic during transition
+
+---
+# Strict mTLS for monitoring namespace communication
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: monitoring-mtls-strict
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: qa-dashboard
+    app.kubernetes.io/component: istio
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus
+  mtls:
+    mode: STRICT

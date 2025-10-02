@@ -1,0 +1,164 @@
+[
+  {
+    "module": "Core Dashboard",
+    "tests": [
+      {
+        "test_case": "Dashboard Responsiveness",
+        "expected_result": "All panels load correctly on desktop, tablet, and mobile",
+        "pass_fail": "PASS",
+        "notes": "Responsive design implemented with CSS Grid and Flexbox"
+      },
+      {
+        "test_case": "Real-time Status Updates",
+        "expected_result": "Workflow states update without page refresh",
+        "pass_fail": "PASS",
+        "notes": "AJAX polling every 5 seconds with smooth animations"
+      },
+      {
+        "test_case": "Workflow Notifications",
+        "expected_result": "Success/failure notifications appear in real-time",
+        "pass_fail": "PASS",
+        "notes": "Toast notifications with auto-dismiss functionality"
+      },
+      {
+        "test_case": "Page Refresh Behavior",
+        "expected_result": "Refreshing page does not break live updates",
+        "pass_fail": "PASS",
+        "notes": "State management preserves polling intervals"
+      }
+    ]
+  },
+  {
+    "module": "User Management",
+    "tests": [
+      {
+        "test_case": "User CRUD Operations",
+        "expected_result": "Add, edit, and remove users functionality working",
+        "pass_fail": "PASS",
+        "notes": "Full REST API with validation and error handling"
+      },
+      {
+        "test_case": "Role-Based Access Control",
+        "expected_result": "Admin/Editor/Viewer permissions implemented",
+        "pass_fail": "FAIL",
+        "notes": "Basic roles defined, full permission system pending"
+      },
+      {
+        "test_case": "Form Validation",
+        "expected_result": "Missing fields and invalid input handled",
+        "pass_fail": "PASS",
+        "notes": "Client and server-side validation implemented"
+      },
+      {
+        "test_case": "Data Persistence",
+        "expected_result": "User data persists across sessions",
+        "pass_fail": "PASS",
+        "notes": "JSON file storage with proper error handling"
+      }
+    ]
+  },
+  {
+    "module": "Data Visualization",
+    "tests": [
+      {
+        "test_case": "Chart Rendering",
+        "expected_result": "Bar, Line, and Doughnut charts render correctly",
+        "pass_fail": "PASS",
+        "notes": "Chart.js integration with responsive design"
+      },
+      {
+        "test_case": "Real-time KPI Updates",
+        "expected_result": "Metrics update every 30 seconds",
+        "pass_fail": "PASS",
+        "notes": "AJAX polling with smooth chart animations"
+      },
+      {
+        "test_case": "Data Export",
+        "expected_result": "JSON and TXT export working correctly",
+        "pass_fail": "PASS",
+        "notes": "Client-side data export with proper formatting"
+      },
+      {
+        "test_case": "Filtering and Sorting",
+        "expected_result": "Data can be filtered and sorted",
+        "pass_fail": "PASS",
+        "notes": "Table sorting and search functionality implemented"
+      }
+    ]
+  },
+  {
+    "module": "Configuration Management",
+    "tests": [
+      {
+        "test_case": "Live Configuration Editing",
+        "expected_result": "Edit system settings directly from dashboard",
+        "pass_fail": "PASS",
+        "notes": "Real-time config updates with validation"
+      },
+      {
+        "test_case": "Backup & Restore",
+        "expected_result": "Configuration backup and restore options",
+        "pass_fail": "PASS",
+        "notes": "File-based backup system implemented"
+      },
+      {
+        "test_case": "Version Tracking",
+        "expected_result": "Configuration changes are tracked",
+        "pass_fail": "FAIL",
+        "notes": "Basic change tracking, full version control pending"
+      }
+    ]
+  },
+  {
+    "module": "Image Gallery & Upload",
+    "tests": [
+      {
+        "test_case": "File Upload System",
+        "expected_result": "Images upload successfully with validation",
+        "pass_fail": "PASS",
+        "notes": "Formidable-based upload with type checking"
+      },
+      {
+        "test_case": "Image Gallery Display",
+        "expected_result": "Thumbnail grid and full-size views functional",
+        "pass_fail": "PASS",
+        "notes": "Responsive grid with Next.js Image optimization"
+      },
+      {
+        "test_case": "Image Management",
+        "expected_result": "Search, filter, and delete functionality",
+        "pass_fail": "PASS",
+        "notes": "Complete CRUD operations for image management"
+      }
+    ]
+  },
+  {
+    "module": "Workflow Automation",
+    "tests": [
+      {
+        "test_case": "Workflow Creation",
+        "expected_result": "Automated workflows can be created and managed",
+        "pass_fail": "PASS",
+        "notes": "Configuration-driven workflow system"
+      },
+      {
+        "test_case": "Workflow Execution",
+        "expected_result": "Workflows execute correctly with proper monitoring",
+        "pass_fail": "PASS",
+        "notes": "Background process management with PID tracking"
+      },
+      {
+        "test_case": "Notification System",
+        "expected_result": "Success/failure notifications are received",
+        "pass_fail": "FAIL",
+        "notes": "Basic notifications implemented, advanced system pending"
+      },
+      {
+        "test_case": "Real-time Monitoring",
+        "expected_result": "Workflow status updates in real-time",
+        "pass_fail": "PASS",
+        "notes": "Live status updates with visual indicators"
+      }
+    ]
+  }
+]

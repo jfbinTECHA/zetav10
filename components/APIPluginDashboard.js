@@ -19,7 +19,7 @@ const APIPluginDashboard = memo(function APIPluginDashboard() {
   const [showApiKeyForm, setShowApiKeyForm] = useState(false);
   const [editingKey, setEditingKey] = useState(null);
 
-  const loadApiKeys = async () => {
+  const loadApiKeys = useCallback(() => {
     try {
       // In a real app, this would fetch from a secure API
       // For demo purposes, we'll check common environment variables
@@ -36,17 +36,9 @@ const APIPluginDashboard = memo(function APIPluginDashboard() {
     } catch (error) {
       console.error("Failed to load API keys:", error);
     }
-  };
-
-  useEffect(() => {
-    loadPlugins();
-    loadTransformers();
-    loadLearningModels();
-    loadLocalModels();
-    loadApiKeys();
   }, []);
 
-  const loadPlugins = async () => {
+  const loadPlugins = useCallback(async () => {
     try {
       const response = await fetch("/api/plugins");
       if (response.ok) {
@@ -56,9 +48,9 @@ const APIPluginDashboard = memo(function APIPluginDashboard() {
     } catch (error) {
       console.error("Failed to load plugins:", error);
     }
-  };
+  }, []);
 
-  const loadTransformers = async () => {
+  const loadTransformers = useCallback(async () => {
     try {
       const response = await fetch("/api/transformers");
       if (response.ok) {
@@ -68,9 +60,9 @@ const APIPluginDashboard = memo(function APIPluginDashboard() {
     } catch (error) {
       console.error("Failed to load transformers:", error);
     }
-  };
+  }, []);
 
-  const loadLearningModels = async () => {
+  const loadLearningModels = useCallback(async () => {
     try {
       const response = await fetch("/api/learning-models");
       if (response.ok) {
@@ -80,7 +72,7 @@ const APIPluginDashboard = memo(function APIPluginDashboard() {
     } catch (error) {
       console.error("Failed to load learning models:", error);
     }
-  };
+  }, []);
 
   const loadLocalModels = useCallback(async () => {
     try {
@@ -108,6 +100,14 @@ const APIPluginDashboard = memo(function APIPluginDashboard() {
       setLocalModelStatus("error");
     }
   }, []);
+
+  useEffect(() => {
+    loadPlugins();
+    loadTransformers();
+    loadLearningModels();
+    loadLocalModels();
+    loadApiKeys();
+  }, [loadPlugins, loadTransformers, loadLearningModels, loadLocalModels, loadApiKeys]);
 
   const checkLocalModelStatus = async () => {
     try {

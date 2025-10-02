@@ -3,6 +3,10 @@ import Head from "next/head";
 import dynamic from "next/dynamic";
 import MissionControl from "../components/MissionControl";
 import APIPluginDashboard from "../components/APIPluginDashboard";
+import WorkflowDashboard from "../components/WorkflowDashboard";
+import UserManagement from "../components/UserManagement";
+import DataVisualization from "../components/DataVisualization";
+import QADashboard from "../components/QADashboard";
 import { Toaster } from "react-hot-toast";
 
 const Page = () => {
@@ -22,12 +26,78 @@ const Page = () => {
             <p className="text-sm text-gray-500">
               Mission control & agent monitoring
             </p>
+            <div style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', gap: '10px' }}>
+              <a
+                href="http://localhost:5000"
+                target="_blank"
+                style={{
+                  backgroundColor: '#FF5722',
+                  color: 'white',
+                  padding: '10px 15px',
+                  textDecoration: 'none',
+                  borderRadius: '5px',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                }}
+              >
+                ⚡ Real-Time QA Dashboard (WebSocket)
+              </a>
+              <a
+                href="/qa-dashboard.html"
+                target="_blank"
+                style={{
+                  backgroundColor: '#4CAF50',
+                  color: 'white',
+                  padding: '10px 15px',
+                  textDecoration: 'none',
+                  borderRadius: '5px',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                }}
+              >
+                📊 QA Dashboard (Aggregated)
+              </a>
+              <a
+                href="/qa-dashboard-granular.html"
+                target="_blank"
+                style={{
+                  backgroundColor: '#2196F3',
+                  color: 'white',
+                  padding: '10px 15px',
+                  textDecoration: 'none',
+                  borderRadius: '5px',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                }}
+              >
+                📈 QA Dashboard (Granular Trends)
+              </a>
+            </div>
           </header>
 
           <MissionControl apiBase="/api" />
 
           <div className="mt-8">
             <APIPluginDashboard />
+          </div>
+
+          <div className="mt-8">
+            <WorkflowDashboard />
+          </div>
+
+          <div className="mt-8">
+            <UserManagement />
+          </div>
+
+          <div className="mt-8">
+            <DataVisualization />
+          </div>
+
+          <div className="mt-8">
+            <QADashboard />
           </div>
         </div>
 

@@ -1,0 +1,28 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: qa-dashboard-pdb
+  labels:
+    app.kubernetes.io/name: qa-dashboard
+    app.kubernetes.io/component: ha
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: qa-dashboard
+
+---
+# PodDisruptionBudget for monitoring components
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: qa-monitoring-pdb
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: qa-dashboard
+    app.kubernetes.io/component: ha
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus

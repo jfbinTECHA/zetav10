@@ -1,0 +1,23 @@
+{{- if .Values.istio.enabled }}
+{{- if .Values.istio.virtualService.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ include "qa-dashboard.fullname" . }}-traffic
+  labels:
+    {{- include "qa-dashboard.labels" . | nindent 4 }}
+    app.kubernetes.io/component: istio
+spec:
+  hosts:
+  {{- range .Values.istio.virtualService.hosts }}
+  - {{ . | quote }}
+  {{- end }}
+  {{- if .Values.istio.virtualService.gateways }}
+  gateways:
+  {{- range .Values.istio.virtualService.gateways }}
+  - {{ . | quote }}
+  {{- end }}
+  {{- end }}
+  http: {{ toYaml .Values.istio.virtualService.http | nindent 4 }}
+{{- end }}
+{{- end }}

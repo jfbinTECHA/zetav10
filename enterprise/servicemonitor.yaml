@@ -1,0 +1,24 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: qa-dashboard-monitor
+  labels:
+    app.kubernetes.io/name: qa-dashboard
+    app.kubernetes.io/component: monitoring
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: qa-dashboard
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+    honorLabels: true
+    relabelings:
+    - sourceLabels: [__meta_kubernetes_service_label_app_kubernetes_io_name]
+      targetLabel: service
+      replacement: qa-dashboard
+  namespaceSelector:
+    matchNames:
+    - qa-monitoring  # Change this to your namespace

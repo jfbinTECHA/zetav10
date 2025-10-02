@@ -1,0 +1,62 @@
+# Staging environment overrides
+# Production-like setup for testing
+
+# Application configuration
+replicaCount: 2
+
+image:
+  tag: "stable"
+
+# Moderate resources
+resources:
+  limits:
+    cpu: 500m
+    memory: 1Gi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+# Full monitoring enabled
+monitoring:
+  enabled: true
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+
+# Partial security for testing
+istio:
+  enabled: true
+  peerAuthentication:
+    mtls:
+      mode: PERMISSIVE  # Allow transition period
+
+security:
+  networkPolicy:
+    enabled: true
+  podSecurityContext:
+    enabled: true
+  securityContext:
+    enabled: true
+
+highAvailability:
+  podDisruptionBudget:
+    enabled: true
+
+# Staging-specific settings
+env:
+  REFRESH_INTERVAL: "15"  # Moderate update frequency
+  REQUIRE_AUTH: "true"   # Enable auth for testing
+
+# Moderate backup retention
+backup_count: 7
+
+# External ingress for staging
+ingress:
+  enabled: true
+  hosts:
+    - host: qa-staging.company.com
+      paths:
+        - path: /
+          pathType: Prefix

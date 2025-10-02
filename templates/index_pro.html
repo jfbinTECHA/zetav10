@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Enhanced QA Dashboard - Authenticated</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<style>
+    body { font-family: Arial; background: #f7f7f7; margin: 20px; }
+    h1 { color: #333; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 30px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #4CAF50; color: white; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+    .PASS { background-color: #c8e6c9; font-weight: bold; }
+    .FAIL { background-color: #ffcdd2; font-weight: bold; }
+    .NEWFAIL { background-color: #ff8a65; font-weight: bold; animation: pulse 2s infinite; }
+    .chart-container { width: 450px; margin: 20px 0; }
+    #charts { display: flex; flex-wrap: wrap; gap: 30px; }
+
+    /* Header with user info and logout */
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: white;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+    }
+    .logout-btn {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+    .logout-btn:hover {
+        background: #c82333;
+    }
+
+    /* Connection status */
+    .connection-status {
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        padding: 10px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        z-index: 1000;
+    }
+    .status-connected { background: #4CAF50; color: white; }
+    .status-disconnected { background: #F44336; color: white; }
+    .status-connecting { background: #FF9800; color: white; }
+
+    /* Notification panel */
+    .notification-panel {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    .notification-item {
+        padding: 0.5rem;
+        border-left: 4px solid #4CAF50;
+        margin-bottom: 0.5rem;
+        background: #f8f9fa;
+    }
+    .notification-item.error {
+        border-left-color: #F44336;
+        background: #ffebee;
+    }
+
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+</style>
+</head>
+<body>
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div>
+            <h1>🔐 Enhanced QA Dashboard</h1>
+            <p>Real-Time Quality Assurance Monitoring</p>
+        </div>
+        <div class="user-info">
+            <div class="user-avatar">{{ session.get('username', 'A')[:1].upper() }}</div>
+            <div>
+                <strong>{{ session.get('username', 'User') }}</strong><br>
+                <small>Authenticated Session</small>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <!-- Connection Status -->
+    <div id="connectionStatus" class="connection-status status-connecting">
+        🔄 Connecting...
+    </div>
+
+    <!-- Notifications Panel -->
+    <div class="notification-panel">
+        <h3>📢 System Notifications</h3>
+        <div id="notifications">
+            <div class="notification-item">
+                System initialized and monitoring active
+            </div>
+        </div>
+    </div>
+
+    <p id="lastUpdated"></p>
+
+    <div id="dashboard"></div>
+    <h2>Regression Trends</h2>
+    <div id="trendCharts"></div>
+
+    <script>
+    let previousFailures = new Set();
+    let moduleCharts = {};
+    let trendCharts = {};
+    let socket;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+
+    // Initialize WebSocket connection
+    function initWebSocket() {
+        socket = io('http://localhost:5000');
+
+        socket.on('connect', function() {
+            console.log('Connected to server');
+            updateConnectionStatus('connected', '🟢 Connected - Real-Time');
+            reconnectAttempts = 0;
+            addNotification('Successfully connected to QA monitoring server', 'success');
+        });
+
+        socket.on('disconnect', function() {
+            console.log('Disconnected from server');
+            updateConnectionStatus('disconnected', '🔴 Disconnected');
+            addNotification('Lost connection to QA monitoring server', 'error');
+            attemptReconnect();
+        });
+
+        socket.on('update', function(data) {
+            console.log('Received update:', data);
+            renderModules(data.current || []);
+            renderTrends(data.historical || {});
+            document.getElementById("lastUpdated").innerText = "Last updated: " + new Date().toLocaleString();
+        });
+
+        socket.on('status', function(data) {
+            addNotification(data.message, 'info');
+        });
+
+        socket.on('connect_error', function(error) {
+            console.error('Connection error:', error);
+            updateConnectionStatus('disconnected', '🔴 Connection Failed');
+            addNotification('Failed to connect to QA monitoring server', 'error');
+            attemptReconnect();
+        });
+    }
+
+    function updateConnectionStatus(status, message) {
+        const statusEl = document.getElementById('connectionStatus');
+        statusEl.className = `connection-status status-${status}`;
+        statusEl.innerText = message;
+    }
+
+    function addNotification(message, type = 'info') {
+        const notificationsEl = document.getElementById('notifications');
+        const notificationEl = document.createElement('div');
+        notificationEl.className = `notification-item ${type === 'error' ? 'error' : ''}`;
+        notificationEl.innerHTML = `${new Date().toLocaleTimeString()}: ${message}`;
+        notificationsEl.insertBefore(notificationEl, notificationsEl.firstChild);
+
+        // Keep only last 10 notifications
+        while (notificationsEl.children.length > 10) {
+            notificationsEl.removeChild(notificationsEl.lastChild);
+        }
+    }
+
+    function attemptReconnect() {
+        if (reconnectAttempts < maxReconnectAttempts) {
+            reconnectAttempts++;
+            updateConnectionStatus('connecting', `🔄 Reconnecting... (${reconnectAttempts}/${maxReconnectAttempts})`);
+            setTimeout(() => {
+                initWebSocket();
+            }, 2000 * reconnectAttempts); // Exponential backoff
+        } else {
+            updateConnectionStatus('disconnected', '🔴 Max reconnection attempts reached');
+            addNotification('Max reconnection attempts reached. Please refresh the page.', 'error');
+        }
+    }
+
+    function logout() {
+        if (socket) {
+            socket.disconnect();
+        }
+        window.location.href = '/logout';
+    }
+
+    // ---------- Render Module Tables + Pie Charts ----------
+    function renderModules(data) {
+        const dash = document.getElementById("dashboard");
+        dash.innerHTML = "";
+        let now = new Date().toLocaleString();
+        document.getElementById("lastUpdated").innerText = "Last updated: " + now;
+
+        data.forEach(module => {
+            let div = document.createElement("div");
+            div.innerHTML = `<h2>${module.module}</h2>`;
+
+            let table = document.createElement("table");
+            let header = table.insertRow();
+            ["Test Case","Expected Result","Pass/Fail","Notes"].forEach(text=>{
+                let th=document.createElement("th"); th.innerText=text; header.appendChild(th);
+            });
+
+            let passCount=0, failCount=0;
+            module.tests.forEach(test=>{
+                let row = table.insertRow();
+                let testId = module.module+"::"+test.test_case;
+                let status = test.pass_fail || "";
+                if(status==="FAIL" && !previousFailures.has(testId)) {
+                    status="NEWFAIL";
+                    addNotification(`NEW FAILURE: ${module.module} - ${test.test_case}`, 'error');
+                }
+                if(test.pass_fail==="PASS") passCount++; else failCount++;
+
+                row.insertCell().innerText = test.test_case;
+                row.insertCell().innerText = test.expected_result || "";
+                let cell = row.insertCell(); cell.innerText = test.pass_fail; cell.className = status;
+                row.insertCell().innerText = test.notes || "";
+
+                if(test.pass_fail==="FAIL") previousFailures.add(testId);
+                else previousFailures.delete(testId);
+            });
+
+            div.appendChild(table);
+
+            // Pie chart
+            let canvas = document.createElement("canvas");
+            div.appendChild(canvas);
+            let chartKey = module.module;
+            if(!moduleCharts[chartKey]){
+                moduleCharts[chartKey] = new Chart(canvas, {
+                    type: 'pie',
+                    data: { labels:['PASS','FAIL'], datasets:[{data:[passCount,failCount], backgroundColor:['#4CAF50','#F44336']}] },
+                    options: { responsive:true, plugins:{ legend:{position:'bottom'}, title:{display:true, text: module.module+" Pass/Fail"} } }
+                });
+            } else {
+                moduleCharts[chartKey].data.datasets[0].data=[passCount,failCount];
+                moduleCharts[chartKey].update();
+            }
+
+            dash.appendChild(div);
+        });
+    }
+
+    // ---------- Render Regression Trend Charts ----------
+    function renderTrends(history) {
+        const container = document.getElementById("trendCharts");
+        container.innerHTML = "";
+
+        Object.entries(history).forEach(([testId, entries])=>{
+            let labels = entries.map(e=>e.timestamp);
+            let data = entries.map(e=> e.status==="PASS"?1:0);
+            let colors = entries.map(e=> e.status==="PASS" ? "#4CAF50" : "#F44336");
+
+            let div = document.createElement("div");
+            div.className="chart-container";
+            let canvas=document.createElement("canvas");
+            div.appendChild(canvas);
+            container.appendChild(div);
+
+            if(!trendCharts[testId]){
+                trendCharts[testId]=new Chart(canvas,{
+                    type:'line',
+                    data:{
+                        labels:labels,
+                        datasets:[{label:testId+" Trend", data:data, borderColor:"#2196F3", fill:false, tension:0.2,
+                                   pointBackgroundColor:colors, pointRadius:6}]
+                    },
+                    options:{
+                        scales:{ y:{ min:0, max:1, ticks:{ stepSize:1, callback:v=>v===1?"PASS":"FAIL"}}},
+                        plugins:{ legend:{display:false}, title:{display:true,text:testId}}
+                    }
+                });
+            } else {
+                let chart=trendCharts[testId];
+                chart.data.labels=labels;
+                chart.data.datasets[0].data=data;
+                chart.data.datasets[0].pointBackgroundColor=colors;
+                chart.update();
+            }
+        });
+    }
+
+    // ---------- Manual Update Request ----------
+    function requestUpdate() {
+        if (socket && socket.connected) {
+            socket.emit('request_update');
+        }
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        initWebSocket();
+    });
+
+    // Add manual refresh button
+    document.addEventListener('DOMContentLoaded', function() {
+        const refreshBtn = document.createElement('button');
+        refreshBtn.innerText = '🔄 Manual Refresh';
+        refreshBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; padding: 10px 15px; background: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer; z-index: 1001;';
+        refreshBtn.onclick = requestUpdate;
+        document.body.appendChild(refreshBtn);
+    });
+    </script>
+</body>
+</html>

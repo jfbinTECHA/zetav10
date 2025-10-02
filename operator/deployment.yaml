@@ -1,0 +1,170 @@
+---
+# ServiceAccount for QA Operator
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: qa-operator-sa
+  namespace: qa-system
+  labels:
+    app.kubernetes.io/name: qa-operator
+    app.kubernetes.io/component: operator
+
+---
+# ClusterRole for QA Operator
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: qa-operator-role
+  labels:
+    app.kubernetes.io/name: qa-operator
+    app.kubernetes.io/component: operator
+rules:
+- apiGroups: ["qa.company.com"]
+  resources: ["qatests", "qasuites", "qaschedules", "qareports"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["batch"]
+  resources: ["jobs", "cronjobs"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["pods", "pods/log", "configmaps", "secrets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["networking.k8s.io"]
+  resources: ["networkpolicies"]
+  verbs: ["get", "list", "watch"]
+
+---
+# ClusterRoleBinding for QA Operator
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: qa-operator-binding
+  labels:
+    app.kubernetes.io/name: qa-operator
+    app.kubernetes.io/component: operator
+subjects:
+- kind: ServiceAccount
+  name: qa-operator-sa
+  namespace: qa-system
+roleRef:
+  kind: ClusterRole
+  name: qa-operator-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# ConfigMap for operator configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qa-operator-config
+  namespace: qa-system
+  labels:
+    app.kubernetes.io/name: qa-operator
+    app.kubernetes.io/component: operator
+data:
+  config.yaml: |
+    apiVersion: v1
+    kind: Config
+    qa:
+      defaultTimeout: 30s
+      defaultRetries: 3
+      concurrentJobs: 5
+      cleanupInterval: 1h
+      reportRetention: 7d
+    notifications:
+      slack:
+        enabled: false
+        webhookUrl: ""
+        defaultChannel: "#qa-alerts"
+      email:
+        enabled: false
+        smtpHost: ""
+        smtpPort: 587
+        fromAddress: "qa@company.com"
+
+---
+# Deployment for QA Operator
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qa-operator
+  namespace: qa-system
+  labels:
+    app.kubernetes.io/name: qa-operator
+    app.kubernetes.io/component: operator
+    app.kubernetes.io/version: "v1.0.0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: qa-operator
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: qa-operator
+        app.kubernetes.io/component: operator
+    spec:
+      serviceAccountName: qa-operator-sa
+      containers:
+      - name: operator
+        image: qa-operator:v1.0.0  # Replace with actual image
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: metrics
+          protocol: TCP
+        - containerPort: 9443
+          name: webhook-server
+          protocol: TCP
+        env:
+        - name: WATCH_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: OPERATOR_NAME
+          value: "qa-operator"
+        volumeMounts:
+        - name: config
+          mountPath: /etc/qa-operator
+          readOnly: true
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      volumes:
+      - name: config
+        configMap:
+          name: qa-operator-config
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+      nodeSelector:
+        kubernetes.io/os: linux
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: qa-operator
+              topologyKey: kubernetes.io/hostname

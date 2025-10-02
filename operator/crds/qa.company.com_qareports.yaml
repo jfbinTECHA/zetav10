@@ -1,0 +1,105 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: qareports.qa.company.com
+  labels:
+    app.kubernetes.io/name: qa-operator
+    app.kubernetes.io/component: crd
+spec:
+  group: qa.company.com
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              testRef:
+                type: object
+                properties:
+                  kind:
+                    type: string
+                    enum: ["QATest", "QASuite"]
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                required:
+                - kind
+                - name
+              retention:
+                type: string
+                default: "7d"
+                description: "How long to retain this report"
+          status:
+            type: object
+            properties:
+              phase:
+                type: string
+                enum: ["Running", "Completed", "Failed"]
+              startTime:
+                type: string
+                format: date-time
+              endTime:
+                type: string
+                format: date-time
+              duration:
+                type: string
+              summary:
+                type: object
+                properties:
+                  totalTests:
+                    type: integer
+                  passedTests:
+                    type: integer
+                  failedTests:
+                    type: integer
+                  skippedTests:
+                    type: integer
+                  successRate:
+                    type: number
+                    minimum: 0
+                    maximum: 100
+              results:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    testName:
+                      type: string
+                    status:
+                      type: string
+                      enum: ["Pass", "Fail", "Skip", "Error"]
+                    duration:
+                      type: string
+                    responseTime:
+                      type: string
+                    statusCode:
+                      type: integer
+                    error:
+                      type: string
+                    output:
+                      type: string
+                    timestamp:
+                      type: string
+                      format: date-time
+              environment:
+                type: object
+                additionalProperties:
+                  type: string
+                description: "Environment information when test ran"
+              metadata:
+                type: object
+                additionalProperties: true
+                description: "Additional metadata about the test run"
+  scope: Namespaced
+  names:
+    plural: qareports
+    singular: qareport
+    kind: QAReport
+    shortNames:
+    - qr
