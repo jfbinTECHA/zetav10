@@ -7,6 +7,9 @@ const APIKeyManagement = () => {
   const [creating, setCreating] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
   const [newKeyPermissions, setNewKeyPermissions] = useState(['read']);
+  const [customKeyValue, setCustomKeyValue] = useState('');
+  const [useCustomKey, setUseCustomKey] = useState(false);
+  const [envVarName, setEnvVarName] = useState('');
 
   useEffect(() => {
     fetchApiKeys();
@@ -35,6 +38,11 @@ const APIKeyManagement = () => {
       return;
     }
 
+    if (useCustomKey && !customKeyValue.trim()) {
+      toast.error('Please enter a custom API key value');
+      return;
+    }
+
     setCreating(true);
     try {
       const response = await fetch('/api/auth', {
@@ -45,6 +53,8 @@ const APIKeyManagement = () => {
         body: JSON.stringify({
           name: newKeyName.trim(),
           permissions: newKeyPermissions,
+          customKey: useCustomKey ? customKeyValue.trim() : null,
+          envVar: envVarName.trim() || null,
         }),
       });
 
@@ -53,6 +63,9 @@ const APIKeyManagement = () => {
         toast.success(`API Key created: ${newKey.key.substring(0, 20)}...`);
         setNewKeyName('');
         setNewKeyPermissions(['read']);
+        setCustomKeyValue('');
+        setUseCustomKey(false);
+        setEnvVarName('');
         fetchApiKeys(); // Refresh the list
       } else {
         const error = await response.json();
@@ -122,10 +135,37 @@ const APIKeyManagement = () => {
       {/* Create New API Key Section */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-xl font-semibold mb-4">Create New API Key</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        {/* Key Generation Mode Toggle */}
+        <div className="mb-4">
+          <div className="flex items-center space-x-4">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="keyMode"
+                checked={!useCustomKey}
+                onChange={() => setUseCustomKey(false)}
+                className="mr-2"
+              />
+              <span className="text-sm font-medium text-gray-700">Auto-generate key</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="keyMode"
+                checked={useCustomKey}
+                onChange={() => setUseCustomKey(true)}
+                className="mr-2"
+              />
+              <span className="text-sm font-medium text-gray-700">Enter custom key</span>
+            </label>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Key Name
+              API Key Name
             </label>
             <input
               type="text"
@@ -135,6 +175,35 @@ const APIKeyManagement = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+
+          {useCustomKey && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                API Key Value
+              </label>
+              <input
+                type="text"
+                value={customKeyValue}
+                onChange={(e) => setCustomKeyValue(e.target.value)}
+                placeholder="Enter your API key value"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+              />
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Environment Variable (Optional)
+            </label>
+            <input
+              type="text"
+              value={envVarName}
+              onChange={(e) => setEnvVarName(e.target.value)}
+              placeholder="e.g., MY_API_KEY"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Permissions
@@ -153,15 +222,16 @@ const APIKeyManagement = () => {
               <option value="admin">Admin (Full access)</option>
             </select>
           </div>
-          <div className="flex items-end">
-            <button
-              onClick={createApiKey}
-              disabled={creating}
-              className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white px-4 py-2 rounded-md font-medium transition-colors"
-            >
-              {creating ? 'Creating...' : 'Create API Key'}
-            </button>
-          </div>
+        </div>
+
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={createApiKey}
+            disabled={creating}
+            className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white px-6 py-2 rounded-md font-medium transition-colors"
+          >
+            {creating ? 'Creating...' : 'Add API Key'}
+          </button>
         </div>
       </div>
 

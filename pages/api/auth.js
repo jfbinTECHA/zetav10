@@ -32,18 +32,23 @@ export default async function handler(req, res) {
   } else if (req.method === 'POST') {
     // Generate new API key
     try {
-      const { name, permissions = ['read'] } = req.body;
+      const { name, permissions = ['read'], customKey, envVar } = req.body;
 
       if (!name) {
         return res.status(400).json({ error: 'Name is required' });
       }
 
       const data = JSON.parse(fs.readFileSync(API_KEYS_FILE, 'utf8'));
+
+      // Use custom key if provided, otherwise generate one
+      const keyValue = customKey && customKey.trim() ? customKey.trim() : crypto.randomBytes(32).toString('hex');
+
       const newKey = {
         id: crypto.randomUUID(),
-        key: crypto.randomBytes(32).toString('hex'),
+        key: keyValue,
         name,
         permissions,
+        envVar: envVar || null,
         created: new Date().toISOString(),
         lastUsed: null
       };
@@ -56,6 +61,7 @@ export default async function handler(req, res) {
         key: newKey.key,
         name: newKey.name,
         permissions: newKey.permissions,
+        envVar: newKey.envVar,
         created: newKey.created
       });
     } catch (error) {
