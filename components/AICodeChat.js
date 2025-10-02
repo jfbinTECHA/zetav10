@@ -1388,8 +1388,8 @@ function AIModelDesigner({ problemType, dataCharacteristics }) {
         <div>
           <h2 className="text-xl font-semibold">🤖 AI Code Chat</h2>
           <p className="text-sm text-gray-600">
-            Current Agent: <span className="font-medium">{agentPersonalities[conversationContext.currentAgent].name}</span>
-            ({agentPersonalities[conversationContext.currentAgent].role})
+            Current Agent: <span className="font-medium">{agentPersonalities[conversationContext.currentAgent]?.name || 'Unknown'}</span>
+            ({agentPersonalities[conversationContext.currentAgent]?.role || 'Unknown Role'})
           </p>
           <p className="text-xs text-gray-500">
             Knowledge Base: {Object.keys(conversationContext.knowledgeBase[conversationContext.currentAgent]).length} topics learned
