@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 import MissionControl from "./MissionControl";
 import AgentCard from "./AgentCard";
 import DataScraper from "./DataScraper";
 import AICodeChat from "./AICodeChat";
+import { stopAlertSound } from "../utils/audioManager";
 
 export default function Dashboard() {
   const [agentStatuses, setAgentStatuses] = useState({
@@ -16,6 +17,13 @@ export default function Dashboard() {
   const [filters, setFilters] = useState({ priority: "all", agent: "all", searchTerm: "" });
   const [highlightOnly, setHighlightOnly] = useState(false);
   const [panicMode, setPanicMode] = useState(false);
+
+  // Stop alert sound when panic mode is disabled
+  useEffect(() => {
+    if (!panicMode) {
+      stopAlertSound();
+    }
+  }, [panicMode]);
 
   const agents = [
     { name: "Chrono", role: "Medical Informatics" },

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useLogs } from "./LogsContext";
+import { playAlertSound, stopAlertSound } from "../utils/audioManager";
 
 const getRealTimeTasks = async (agentName) => {
   const sources = {
@@ -109,10 +110,6 @@ export default function AgentCard({ name, role, onStatusChange, filters, highlig
   useEffect(() => {
     if (status !== "active") return;
 
-    const highPrioritySound = new Audio("/alert.mp3");
-    highPrioritySound.volume = 0.5; // 50% volume
-    highPrioritySound.loop = false;  // play once
-
     const randomDelay = () => Math.floor(Math.random() * 5000) + 3000;
     let timeoutId;
 
@@ -151,8 +148,8 @@ export default function AgentCard({ name, role, onStatusChange, filters, highlig
       // 🚨 Toast notification
       if (task.priority === "high") {
         toast.error(`${name}: ${task.message}`, { duration: 5000 });
-        // 🔊 Play sound alert
-        highPrioritySound.play().catch((err) => console.log("Sound play error:", err));
+        // 🔊 Play sound alert using improved audio manager
+        playAlertSound();
       }
 
       timeoutId = setTimeout(generateTask, randomDelay());
