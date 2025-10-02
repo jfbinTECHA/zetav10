@@ -20,13 +20,16 @@ const APIKeyManagement = () => {
       const response = await fetch('/api/auth');
       if (response.ok) {
         const data = await response.json();
-        setApiKeys(data.keys || []);
+        setApiKeys(Array.isArray(data.keys) ? data.keys : []);
       } else {
+        console.error('Failed to fetch API keys:', response.status);
         toast.error('Failed to fetch API keys');
+        setApiKeys([]);
       }
     } catch (error) {
       console.error('Error fetching API keys:', error);
       toast.error('Error fetching API keys');
+      setApiKeys([]);
     } finally {
       setLoading(false);
     }
@@ -213,7 +216,7 @@ const APIKeyManagement = () => {
               value={newKeyPermissions}
               onChange={(e) => {
                 const values = Array.from(e.target.selectedOptions, option => option.value);
-                setNewKeyPermissions(values);
+                setNewKeyPermissions(values.length > 0 ? values : ['read']);
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
@@ -268,56 +271,65 @@ const APIKeyManagement = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {apiKeys.map((key) => (
-                  <tr key={key.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {key.name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        ID: {key.id}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-wrap gap-1">
-                        {key.permissions.map((perm) => (
-                          <span
-                            key={perm}
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              perm === 'admin'
-                                ? 'bg-red-100 text-red-800'
-                                : perm === 'write'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-green-100 text-green-800'
-                            }`}
+                {apiKeys.map((key) => {
+                  try {
+                    return (
+                      <tr key={key?.id || Math.random()} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {key?.name || 'Unknown'}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            ID: {key?.id || 'N/A'}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex flex-wrap gap-1">
+                            {key?.permissions && Array.isArray(key.permissions) ? key.permissions.map((perm) => (
+                              <span
+                                key={perm}
+                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  perm === 'admin'
+                                    ? 'bg-red-100 text-red-800'
+                                    : perm === 'write'
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : 'bg-green-100 text-green-800'
+                                }`}
+                              >
+                                {perm}
+                              </span>
+                            )) : (
+                              <span className="text-xs text-gray-500">No permissions</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {key?.created ? formatDate(key.created) : 'Unknown'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {key?.lastUsed ? formatDate(key.lastUsed) : 'Never'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button
+                            onClick={() => copyToClipboard(key?.id || '')}
+                            className="text-blue-600 hover:text-blue-900 mr-3"
                           >
-                            {perm}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(key.created)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {key.lastUsed ? formatDate(key.lastUsed) : 'Never'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => copyToClipboard(key.id)}
-                        className="text-blue-600 hover:text-blue-900 mr-3"
-                      >
-                        Copy ID
-                      </button>
-                      <button
-                        onClick={() => deleteApiKey(key.id, key.name)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                            Copy ID
+                          </button>
+                          <button
+                            onClick={() => deleteApiKey(key?.id || '', key?.name || 'Unknown')}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  } catch (error) {
+                    console.error('Error rendering API key:', error, key);
+                    return null;
+                  }
+                }).filter(Boolean)}
               </tbody>
             </table>
           </div>
