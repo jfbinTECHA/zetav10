@@ -1,5 +1,7 @@
+import { requireAuth } from '../../utils/auth.js';
+
 // API endpoint for managing learning models
-export default async function handler(req, res) {
+async function handler(req, res) {
   const { method } = req;
 
   switch (method) {
@@ -215,3 +217,5 @@ export default async function handler(req, res) {
       res.status(405).json({ error: `Method ${method} not allowed` });
   }
 }
+
+export default requireAuth(handler);

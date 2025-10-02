@@ -1,4 +1,6 @@
-export default async function handler(req, res) {
+import { requireAuth } from '../../utils/auth.js';
+
+async function handler(req, res) {
   if (req.method === "GET") {
     // Mock plugins data
     const plugins = [
@@ -66,3 +68,5 @@ export default async function handler(req, res) {
 
   return res.status(405).json({ error: "Method not allowed" });
 }
+
+export default requireAuth(handler);

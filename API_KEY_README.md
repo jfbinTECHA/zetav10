@@ -27,23 +27,47 @@ curl -H "Authorization: Bearer a6e971e2ad33b884996ff75dc9da0b2e497abacadaf336a01
 
 ## Available Endpoints
 
-### Agents Data
+### 🤖 Agents Data
 - **URL:** `/api/agents`
 - **Method:** GET
 - **Description:** Get information about active AI agents
 - **Response:** List of agents with status, tasks, and health information
 
-### QA Data
+### 🔍 QA Data
 - **URL:** `/api/qa-data`
 - **Method:** GET
 - **Description:** Get QA test results and historical data
 - **Response:** Combined QA results and historical trends
 
-### Other Endpoints
-- `/api/logs` - System logs
-- `/api/qa-results` - QA test results
-- `/api/metrics` - System metrics
-- `/api/workflow/status` - Workflow status
+### 🔧 Data Transformers
+- **URL:** `/api/transformers`
+- **Method:** GET
+- **Description:** Get available data transformation tools
+- **Response:** List of transformers (text preprocessing, sentiment analysis, etc.)
+
+### 🧠 Learning Models
+- **URL:** `/api/learning-models`
+- **Method:** GET
+- **Description:** Get information about available AI/ML models
+- **Response:** List of models (GPT, BERT, ResNet, CLIP, etc.) with capabilities
+
+### 🔌 API Plugins
+- **URL:** `/api/plugins`
+- **Method:** GET
+- **Description:** Get available API integrations and plugins
+- **Response:** List of plugins (OpenAI, Anthropic, Hugging Face, etc.)
+
+### 📊 System Metrics
+- **URL:** `/api/metrics`
+- **Method:** GET
+- **Description:** Get real-time system performance metrics
+- **Response:** CPU, memory, workflow stats, API usage, etc.
+
+### 📋 Additional Endpoints
+- `/api/logs` - System logs and activity
+- `/api/qa-results` - Raw QA test results
+- `/api/workflow/status` - Current workflow execution status
+- `/api/workflow/control` - Workflow management (start/stop)
 
 ## Error Responses
 

@@ -1,4 +1,6 @@
-export default async function handler(req, res) {
+import { requireAuth } from '../../../utils/auth.js';
+
+async function handler(req, res) {
   if (req.method === 'GET') {
     // Mock real-time metrics data
     const metrics = {
@@ -34,3 +36,5 @@ export default async function handler(req, res) {
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
+
+export default requireAuth(handler);
