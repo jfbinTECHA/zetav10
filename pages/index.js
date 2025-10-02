@@ -7,6 +7,7 @@ import WorkflowDashboard from "../components/WorkflowDashboard";
 import UserManagement from "../components/UserManagement";
 import DataVisualization from "../components/DataVisualization";
 import QADashboard from "../components/QADashboard";
+import APIKeyManagement from "../components/APIKeyManagement";
 import { Toaster } from "react-hot-toast";
 
 const Page = () => {
@@ -98,6 +99,10 @@ const Page = () => {
 
           <div className="mt-8">
             <QADashboard />
+          </div>
+
+          <div className="mt-8">
+            <APIKeyManagement />
           </div>
         </div>
 
