@@ -1,7 +1,17 @@
-import React from "react";
-import { exec } from "child_process";
+import React, { useState, useEffect } from "react";
 
 export default function RunDetail({ run }) {
+  const [content, setContent] = useState("Loading...");
+
+  useEffect(() => {
+    if (run && run.logFile) {
+      fetch(`../logs/${run.logFile}`)
+        .then((response) => response.text())
+        .then((text) => setContent(text))
+        .catch((err) => setContent("Failed to load log: " + err.message));
+    }
+  }, [run]);
+
   const rerunFailed = () => {
     if (run.status !== "Failure") {
       alert("Only failed runs can be re-run");
@@ -9,26 +19,22 @@ export default function RunDetail({ run }) {
     }
 
     // Execute the runner script for the failed update
-    exec("node ../run_workflow.js", (error, stdout, stderr) => {
-      if (error) {
-        alert("Error running workflow: " + error.message);
-        return;
-      }
-      if (stderr) {
-        console.error(stderr);
-      }
-      alert("Re-run triggered. Check logs folder for updates.");
-    });
+    // Note: In browser, we can't exec node, so this is placeholder
+    alert(
+      "Re-run not supported in browser. Run 'node ../run_workflow.js' manually."
+    );
   };
+
+  if (!run) return null;
 
   return (
     <div
       style={{ border: "1px solid #ccc", padding: "10px", marginTop: "10px" }}
     >
       <h3>
-        {run.file} - {run.status}
+        {run.name} - {run.status}
       </h3>
-      <pre style={{ whiteSpace: "pre-wrap" }}>{run.content}</pre>
+      <pre style={{ whiteSpace: "pre-wrap" }}>{content}</pre>
       {run.status === "Failure" && (
         <button
           onClick={rerunFailed}
