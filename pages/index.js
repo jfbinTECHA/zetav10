@@ -1,14 +1,36 @@
 import React from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
-import MissionControl from "../components/MissionControl";
-import APIPluginDashboard from "../components/APIPluginDashboard";
-import WorkflowDashboard from "../components/WorkflowDashboard";
-import UserManagement from "../components/UserManagement";
-import DataVisualization from "../components/DataVisualization";
-import QADashboard from "../components/QADashboard";
-import APIKeyManagement from "../components/APIKeyManagement";
 import { Toaster } from "react-hot-toast";
+
+// Dynamically import components to prevent client-side exceptions
+const MissionControl = dynamic(() => import("../components/MissionControl"), {
+  loading: () => <div className="p-6 text-center">Loading Mission Control...</div>
+});
+
+const APIPluginDashboard = dynamic(() => import("../components/APIPluginDashboard"), {
+  loading: () => <div className="p-6 text-center">Loading API Plugin Dashboard...</div>
+});
+
+const WorkflowDashboard = dynamic(() => import("../components/WorkflowDashboard"), {
+  loading: () => <div className="p-6 text-center">Loading Workflow Dashboard...</div>
+});
+
+const UserManagement = dynamic(() => import("../components/UserManagement"), {
+  loading: () => <div className="p-6 text-center">Loading User Management...</div>
+});
+
+const DataVisualization = dynamic(() => import("../components/DataVisualization"), {
+  loading: () => <div className="p-6 text-center">Loading Data Visualization...</div>
+});
+
+const QADashboard = dynamic(() => import("../components/QADashboard"), {
+  loading: () => <div className="p-6 text-center">Loading QA Dashboard...</div>
+});
+
+const APIKeyManagement = dynamic(() => import("../components/APIKeyManagement"), {
+  loading: () => <div className="p-6 text-center">Loading API Key Management...</div>
+});
 
 const Page = () => {
   return (
