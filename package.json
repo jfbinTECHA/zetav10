@@ -1,28 +1,32 @@
 {
-  "name": "zeta-ai-dashboard",
+  "name": "zetav10",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "eslint . --ext .js,.jsx",
+    "format": "prettier --write .",
+    "test": "jest --passWithNoTests",
+    "prepare": "husky install"
   },
   "dependencies": {
-    "@tailwindcss/postcss": "^4.1.14",
-    "axios": "^1.12.2",
-    "cheerio": "^1.0.0-rc.10",
-    "dompurify": "^3.2.7",
-    "next": "latest",
-    "prop-types": "^15.8.1",
-    "react": "latest",
-    "react-dom": "latest",
-    "react-hot-toast": "^2.6.0",
-    "react-window": "^2.2.0",
-    "swr": "^2.3.6"
+    "dompurify": "^3.0.0",
+    "next": "14.0.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-hot-toast": "^2.4.0",
+    "react-window": "^1.8.8",
+    "swr": "^2.1.0",
+    "prop-types": "^15.8.1"
   },
   "devDependencies": {
-    "autoprefixer": "latest",
-    "postcss": "latest",
-    "tailwindcss": "latest"
+    "eslint": "^8.50.0",
+    "eslint-config-next": "14.0.0",
+    "prettier": "^2.8.8",
+    "husky": "^8.0.0",
+    "jest": "^29.6.0",
+    "@testing-library/react": "^14.0.0"
   }
 }
