@@ -1,0 +1,127 @@
+{
+  "task": "zetav10_workflow_path_based",
+  "description": "ZetaV10 workflow using file paths instead of embedded content, with dry-run, backup, failure-only notifications, log retention, and dashboard-ready",
+  "parameters": {
+    "dry_run": true,
+    "log_dir": "logs",
+    "max_logs": 30,
+    "backup_count": 5
+  },
+  "steps": [
+    {
+      "action": "run_command",
+      "command": "mkdir -p logs backup dashboard/src dashboard/public"
+    },
+    {
+      "action": "run_command",
+      "command": "LOG_FILE=${log_dir}/zetav10_$(date +'%Y%m%d_%H%M%S').log; echo 'Logging to: '$LOG_FILE; exec > >(tee -a $LOG_FILE) 2>&1"
+    },
+    {
+      "action": "run_command",
+      "command": "DRY=${dry_run:-false}; echo 'Dry-run mode: '$DRY"
+    },
+    {
+      "action": "run_command",
+      "command": "FILES_TO_UPDATE=('components/AgentCard.js' 'components/MissionControl.js' 'components/LogsPanel.js' 'pages/index.js' 'package.json')"
+    },
+    {
+      "action": "run_command",
+      "command": "notify_failure() { MESSAGE=\"$1\"; echo \"$MESSAGE\"; if [ ! -z \"$SLACK_WEBHOOK_URL\" ]; then curl -X POST -H 'Content-type: application/json' --data \"{\\\"text\\\":\\\"$MESSAGE\\\"}\" $SLACK_WEBHOOK_URL; fi; if command -v notify-send &> /dev/null; then notify-send 'ZetaV10 Update Failure' \"$MESSAGE\"; fi; if [ ! -z \"$EMAIL_TO\" ]; then node -e \"const nodemailer=require('nodemailer');(async()=>{let t=nodemailer.createTransport({host:'$EMAIL_SERVER',port:587,secure:false,auth:{user:'$EMAIL_USER',pass:'$EMAIL_PASS'}}); await t.sendMail({from:'$EMAIL_FROM',to:'$EMAIL_TO',subject:'ZetaV10 Update Failure',text:'$MESSAGE'});})();\"; fi; }"
+    },
+    {
+      "action": "run_command",
+      "command": "if [ \"$DRY\" = \"false\" ] && [ -n \"$(git status --porcelain)\" ]; then notify_failure 'Uncommitted changes detected — aborting update'; exit 1; else echo 'Dry-run: would check git status'; fi"
+    },
+    {
+      "action": "run_command",
+      "command": "TIMESTAMP=$(date +'%Y%m%d_%H%M%S'); BACKUP_DIR=backup/$TIMESTAMP; echo 'Backup dir: '$BACKUP_DIR; if [ \"$DRY\" = \"false\" ]; then mkdir -p $BACKUP_DIR && echo $BACKUP_DIR > .last_backup; else echo 'Dry-run: would create backup'; fi"
+    },
+    {
+      "action": "run_command",
+      "command": "for f in \"${FILES_TO_UPDATE[@]}\"; do if [ \"$DRY\" = \"false\" ]; then cp \"$f\" $BACKUP_DIR/; else echo 'Dry-run: would backup '$f; fi; done"
+    },
+    {
+      "action": "install_dependencies",
+      "packages": {
+        "dependencies": [
+          "swr",
+          "react-window",
+          "react-hot-toast",
+          "prop-types",
+          "dompurify",
+          "nodemailer"
+        ],
+        "devDependencies": [
+          "eslint",
+          "prettier",
+          "husky",
+          "jest",
+          "@testing-library/react",
+          "axios"
+        ]
+      }
+    },
+    {
+      "action": "replace_file",
+      "path": "components/AgentCard.js",
+      "source_path": "components/AgentCard.js",
+      "dry_run_message": "Would replace components/AgentCard.js"
+    },
+    {
+      "action": "replace_file",
+      "path": "components/MissionControl.js",
+      "source_path": "components/MissionControl.js",
+      "dry_run_message": "Would replace components/MissionControl.js"
+    },
+    {
+      "action": "replace_file",
+      "path": "components/LogsPanel.js",
+      "source_path": "components/LogsPanel.js",
+      "dry_run_message": "Would replace components/LogsPanel.js"
+    },
+    {
+      "action": "replace_file",
+      "path": "pages/index.js",
+      "source_path": "pages/index.js",
+      "dry_run_message": "Would replace pages/index.js"
+    },
+    {
+      "action": "replace_file",
+      "path": "package.json",
+      "source_path": "package.json",
+      "dry_run_message": "Would replace package.json"
+    },
+    {
+      "action": "run_command",
+      "command": "echo 'Linting...'; if [ \"$DRY\" = \"false\" ]; then npm run lint || (notify_failure '⚠️ Lint failed — rolling back'; cp -r $(cat .last_backup)/* .; exit 1); fi"
+    },
+    {
+      "action": "run_command",
+      "command": "echo 'Formatting...'; if [ \"$DRY\" = \"false\" ]; then npm run format || (notify_failure '⚠️ Format failed — rolling back'; cp -r $(cat .last_backup)/* .; exit 1); fi"
+    },
+    {
+      "action": "run_command",
+      "command": "echo 'Testing...'; if [ \"$DRY\" = \"false\" ]; then npm test || (notify_failure '⚠️ Tests failed — rolling back'; cp -r $(cat .last_backup)/* .; exit 1); fi"
+    },
+    {
+      "action": "run_command",
+      "command": "echo 'Committing and pushing...'; if [ \"$DRY\" = \"false\" ]; then git add . && git commit -m 'Update ZetaV10 components' && git push || notify_failure '⚠️ Commit/Push failed'; fi"
+    },
+    {
+      "action": "run_command",
+      "command": "echo 'Cleaning old backups...'; if [ \"$DRY\" = \"false\" ]; then ls -1dt backup/* | tail -n +${backup_count} | xargs -r rm -rf; fi"
+    },
+    {
+      "action": "run_command",
+      "command": "echo 'Cleaning old logs...'; ls -1dt ${log_dir}/* | tail -n +${max_logs} | xargs -r rm -f"
+    },
+    {
+      "action": "run_command",
+      "command": "echo '----- SUMMARY REPORT -----'; echo 'Files updated: ${FILES_TO_UPDATE[@]}'; echo 'Backup: '$BACKUP_DIR; echo 'Log: '$LOG_FILE; echo '--------------------------'"
+    },
+    {
+      "action": "run_command",
+      "command": "echo 'Emailing summary report...'; if [ ! -z \"$EMAIL_TO\" ]; then node -e \"const nodemailer=require('nodemailer'); const fs=require('fs'); (async()=>{let t=nodemailer.createTransport({host:'$EMAIL_SERVER',port:587,secure:false,auth:{user:'$EMAIL_USER',pass:'$EMAIL_PASS'}}); let report=fs.readFileSync('$LOG_FILE','utf8'); await t.sendMail({from:'$EMAIL_FROM',to:'$EMAIL_TO',subject:'ZetaV10 Update Summary',text:report});})();\"; fi"
+    }
+  ]
+}
