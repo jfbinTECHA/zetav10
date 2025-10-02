@@ -1,10 +1,11 @@
 import fs from 'fs';
 import path from 'path';
+import { requireAuth } from '../../utils/auth.js';
 
 const QA_RESULTS_FILE = path.join(process.cwd(), 'kilo_qa_checklist_results.json');
 const QA_HISTORY_FILE = path.join(process.cwd(), 'kilo_qa_history.json');
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       let current = [];
@@ -36,3 +37,5 @@ export default async function handler(req, res) {
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
+
+export default requireAuth(handler);
