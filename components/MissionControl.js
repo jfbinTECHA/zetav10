@@ -5,30 +5,20 @@ import AgentCard from "./AgentCard";
 import toast from "react-hot-toast";
 
 const LogsPanel = dynamic(() => import("./LogsPanel"), { ssr: false });
-
 const fetcher = (...args) =>
   fetch(...args).then((res) => {
     if (!res.ok) throw new Error("Network response was not ok");
     return res.json();
   });
 
-/**
- * MissionControl
- * - Uses SWR for client caching + revalidation
- * - Shows audio/sound gating (user gesture required)
- * - Clean WebSocket example (if you use sockets, adapt below)
- */
-
 export default function MissionControl({ apiBase = "/api" }) {
   const { data, error, mutate } = useSWR(`${apiBase}/agents`, fetcher, {
     refreshInterval: 5000,
     revalidateOnFocus: true,
   });
-
   const [panicMode, setPanicMode] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(false);
   const audioRef = useRef(null);
-  const wsRef = useRef(null);
 
   useEffect(() => {
     if (!audioRef.current) {
@@ -45,7 +35,6 @@ export default function MissionControl({ apiBase = "/api" }) {
         try {
           await audioRef.current?.play();
         } catch (err) {
-          console.warn("Audio blocked by browser: ", err);
           toast("Audio blocked — using visual alerts only");
         }
       } else {
@@ -56,23 +45,10 @@ export default function MissionControl({ apiBase = "/api" }) {
     [soundEnabled]
   );
 
-  // Example WebSocket connection skeleton (optional)
-  useEffect(() => {
-    // If you use server socket events, wire them here
-    // const ws = new WebSocket('wss://example.com/agent-stream');
-    // wsRef.current = ws;
-    // ws.onmessage = (ev) => { mutate(); /* or process event */ };
-    // ws.onerror = () => { console.error('WS error'); };
-    // return () => { ws.close(); };
-    return undefined;
-  }, [mutate]);
-
-  if (error) {
+  if (error)
     return (
       <div className="p-4">Failed to load agents: {String(error.message)}</div>
     );
-  }
-
   const agents = Array.isArray(data?.agents) ? data.agents : [];
 
   const handleAcknowledge = async (agent) => {
@@ -83,7 +59,7 @@ export default function MissionControl({ apiBase = "/api" }) {
         body: JSON.stringify({ agentId: agent.id || agent.name }),
       });
       toast.success(`Acknowledged ${agent.name || "agent"}`);
-      mutate(); // refresh
+      mutate();
     } catch (err) {
       toast.error("Failed to acknowledge");
     }
@@ -113,7 +89,6 @@ export default function MissionControl({ apiBase = "/api" }) {
           </button>
         </div>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {agents.length === 0 && (
           <div className="text-gray-500">No agents found</div>
@@ -126,7 +101,6 @@ export default function MissionControl({ apiBase = "/api" }) {
           />
         ))}
       </div>
-
       <div>
         <LogsPanel apiBase={apiBase} panicMode={panicMode} />
       </div>
