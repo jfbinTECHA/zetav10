@@ -48,6 +48,7 @@ export default function LogsPanel({ apiBase = "/api", panicMode = false }) {
       </div>
       <div style={{ height: 300 }}>
         <List
+          height={300}
           itemCount={logs.length}
           itemSize={68}
           width="100%"

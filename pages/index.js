@@ -2,6 +2,7 @@ import React from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import MissionControl from "../components/MissionControl";
+import APIPluginDashboard from "../components/APIPluginDashboard";
 import { Toaster } from "react-hot-toast";
 
 const Page = () => {
@@ -24,6 +25,10 @@ const Page = () => {
           </header>
 
           <MissionControl apiBase="/api" />
+
+          <div className="mt-8">
+            <APIPluginDashboard />
+          </div>
         </div>
 
         <Toaster position="top-right" />

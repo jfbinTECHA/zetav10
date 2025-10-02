@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST = "{}";
+self.__REACT_LOADABLE_MANIFEST="{\"../components/MissionControl.js -> ./LogsPanel\":{\"id\":\"../components/MissionControl.js -> ./LogsPanel\",\"files\":[\"static/chunks/components_LogsPanel_js.js\"]}}"

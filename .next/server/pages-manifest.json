@@ -1,5 +1,13 @@
 {
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
-  "/_document": "pages/_document.js"
+  "/_document": "pages/_document.js",
+  "/": "pages/index.js",
+  "/api/agents": "pages/api/agents.js",
+  "/api/logs": "pages/api/logs.js",
+  "/api/ai-chat": "pages/api/ai-chat.js",
+  "/api/acknowledge": "pages/api/acknowledge.js",
+  "/api/plugins": "pages/api/plugins.js",
+  "/api/transformers": "pages/api/transformers.js",
+  "/api/learning-models": "pages/api/learning-models.js"
 }

@@ -37,6 +37,9 @@ function AgentCard({ agent = {}, onAcknowledge = () => {} }) {
             <div key={idx} className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="text-sm font-medium">{safeMsg}</div>
+                {t.details && (
+                  <div className="text-xs text-gray-500 mt-1">{t.details}</div>
+                )}
                 <div className="text-xs text-gray-400">
                   {t.source || "agent"}
                 </div>

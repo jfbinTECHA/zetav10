@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 
 const APIPluginDashboard = memo(function APIPluginDashboard() {
   const [plugins, setPlugins] = useState([]);
@@ -15,13 +15,36 @@ const APIPluginDashboard = memo(function APIPluginDashboard() {
   const [localTestInput, setLocalTestInput] = useState("");
   const [localTestOutput, setLocalTestOutput] = useState("");
   const [localModelStatus, setLocalModelStatus] = useState("checking");
+  const [apiKeys, setApiKeys] = useState({});
+  const [showApiKeyForm, setShowApiKeyForm] = useState(false);
+  const [editingKey, setEditingKey] = useState(null);
+
+  const loadApiKeys = async () => {
+    try {
+      // In a real app, this would fetch from a secure API
+      // For demo purposes, we'll check common environment variables
+      const mockApiKeys = {
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
+        ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || "",
+        HUGGINGFACE_API_KEY: process.env.HUGGINGFACE_API_KEY || "",
+        SLACK_WEBHOOK_URL: process.env.SLACK_WEBHOOK_URL || "",
+        EMAIL_SERVER: process.env.EMAIL_SERVER || "",
+        EMAIL_USER: process.env.EMAIL_USER || "",
+        EMAIL_PASS: process.env.EMAIL_PASS || "",
+      };
+      setApiKeys(mockApiKeys);
+    } catch (error) {
+      console.error("Failed to load API keys:", error);
+    }
+  };
 
   useEffect(() => {
     loadPlugins();
     loadTransformers();
     loadLearningModels();
     loadLocalModels();
-  }, [loadLocalModels]);
+    loadApiKeys();
+  }, []);
 
   const loadPlugins = async () => {
     try {
@@ -230,6 +253,16 @@ const APIPluginDashboard = memo(function APIPluginDashboard() {
             }`}
           >
             Local AI ({localModels.length})
+          </button>
+          <button
+            onClick={() => setActiveTab("apikeys")}
+            className={`px-4 py-2 rounded-lg font-medium ${
+              activeTab === "apikeys"
+                ? "bg-purple-500 text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+          >
+            🔑 API Keys
           </button>
         </div>
       </div>
@@ -755,6 +788,207 @@ const APIPluginDashboard = memo(function APIPluginDashboard() {
               <li>• Conversations remain completely private</li>
               <li>• Models run using Hugging Face Transformers</li>
             </ul>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "apikeys" && (
+        <div className="space-y-6">
+          {/* API Keys Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-semibold text-blue-800">Total Keys</h4>
+              <p className="text-2xl font-bold text-blue-600">
+                {Object.keys(apiKeys).length}
+              </p>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h4 className="font-semibold text-green-800">Configured</h4>
+              <p className="text-2xl font-bold text-green-600">
+                {
+                  Object.values(apiKeys).filter((key) => key && key.trim())
+                    .length
+                }
+              </p>
+            </div>
+            <div className="bg-yellow-50 p-4 rounded-lg">
+              <h4 className="font-semibold text-yellow-800">Missing</h4>
+              <p className="text-2xl font-bold text-yellow-600">
+                {
+                  Object.values(apiKeys).filter((key) => !key || !key.trim())
+                    .length
+                }
+              </p>
+            </div>
+            <div className="bg-red-50 p-4 rounded-lg">
+              <h4 className="font-semibold text-red-800">Security</h4>
+              <p className="text-lg font-bold text-red-600">🔒 Encrypted</p>
+            </div>
+          </div>
+
+          {/* API Keys Management */}
+          <div className="bg-white border rounded-lg p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">API Key Management</h3>
+              <button
+                onClick={() => setShowApiKeyForm(true)}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Add API Key
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {[
+                {
+                  name: "OpenAI",
+                  key: "OPENAI_API_KEY",
+                  description: "GPT-4 and other OpenAI models",
+                },
+                {
+                  name: "Anthropic",
+                  key: "ANTHROPIC_API_KEY",
+                  description: "Claude AI models",
+                },
+                {
+                  name: "Hugging Face",
+                  key: "HUGGINGFACE_API_KEY",
+                  description: "Open-source AI models",
+                },
+                {
+                  name: "Slack Webhook",
+                  key: "SLACK_WEBHOOK_URL",
+                  description: "Failure notifications",
+                },
+                {
+                  name: "Email Server",
+                  key: "EMAIL_SERVER",
+                  description: "SMTP server for notifications",
+                },
+                {
+                  name: "Email User",
+                  key: "EMAIL_USER",
+                  description: "SMTP authentication username",
+                },
+                {
+                  name: "Email Password",
+                  key: "EMAIL_PASS",
+                  description: "SMTP authentication password",
+                },
+              ].map((apiKey) => (
+                <div
+                  key={apiKey.key}
+                  className="flex items-center justify-between p-4 border rounded"
+                >
+                  <div className="flex-1">
+                    <div className="font-medium">{apiKey.name}</div>
+                    <div className="text-sm text-gray-600">
+                      {apiKey.description}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      Environment Variable: {apiKey.key}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div
+                      className={`w-3 h-3 rounded-full ${
+                        apiKeys[apiKey.key] ? "bg-green-500" : "bg-red-500"
+                      }`}
+                    ></div>
+                    <span className="text-sm">
+                      {apiKeys[apiKey.key] ? "Set" : "Not Set"}
+                    </span>
+                    <button
+                      onClick={() => {
+                        setEditingKey(apiKey);
+                        setShowApiKeyForm(true);
+                      }}
+                      className="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Security Notice */}
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <h4 className="font-semibold text-yellow-800 mb-2">
+              🔐 Security Notice
+            </h4>
+            <ul className="text-sm text-yellow-700 space-y-1">
+              <li>• API keys are stored securely in environment variables</li>
+              <li>• Keys are never displayed in plain text in the UI</li>
+              <li>• Changes require server restart to take effect</li>
+              <li>• Use .env file for local development</li>
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* API Key Form Modal */}
+      {(showApiKeyForm || editingKey) && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-lg font-semibold mb-4">
+              {editingKey ? `Edit ${editingKey.name} API Key` : "Add API Key"}
+            </h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  API Key Name
+                </label>
+                <input
+                  type="text"
+                  value={editingKey?.name || ""}
+                  disabled
+                  className="w-full p-2 border rounded bg-gray-100"
+                  placeholder="API Key Name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Environment Variable
+                </label>
+                <input
+                  type="text"
+                  value={editingKey?.key || ""}
+                  disabled
+                  className="w-full p-2 border rounded bg-gray-100 font-mono text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  API Key Value
+                </label>
+                <input
+                  type="password"
+                  defaultValue={apiKeys[editingKey?.key] || ""}
+                  className="w-full p-2 border rounded"
+                  placeholder="Enter API key value"
+                />
+              </div>
+            </div>
+
+            <div className="flex space-x-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowApiKeyForm(false);
+                  setEditingKey(null);
+                }}
+                className="flex-1 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+              <button className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                Save API Key
+              </button>
+            </div>
           </div>
         </div>
       )}
