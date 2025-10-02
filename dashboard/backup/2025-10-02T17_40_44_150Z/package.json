@@ -1,0 +1,11 @@
+{
+  "name": "zetav10-dashboard",
+  "version": "1.0.0",
+  "description": "ZetaV10 Dashboard",
+  "main": "src/App.js",
+  "scripts": {
+    "start": "npx serve public"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
