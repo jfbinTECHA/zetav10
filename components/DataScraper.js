@@ -83,8 +83,8 @@ export default function DataScraper() {
         Data Scraper & Code Generator
       </h2>
       <p className="text-xs text-gray-600 mb-4">
-        {/* eslint-disable-next-line react/no-unescaped-entities */}
         Note: GitHub scraping fetches public README files only, respecting
+        {/* eslint-disable-next-line react/no-unescaped-entities */}
         GitHub's Terms of Service. YouTube scraping extracts public video
         metadata and descriptions. Use responsibly and respect platform
         policies.
