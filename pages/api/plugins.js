@@ -1,8 +1,6 @@
-import { requireAuth } from '../../utils/auth.js';
-
-async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method === "GET") {
-    // Mock plugins data
+    // Mock plugins data (public dashboard information)
     const plugins = [
       {
         id: "openai-plugin",
@@ -68,5 +66,3 @@ async function handler(req, res) {
 
   return res.status(405).json({ error: "Method not allowed" });
 }
-
-export default requireAuth(handler);

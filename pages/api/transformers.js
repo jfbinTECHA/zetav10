@@ -1,8 +1,6 @@
-import { requireAuth } from '../../utils/auth.js';
-
-async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method === "GET") {
-    // Mock transformers data
+    // Mock transformers data (public dashboard information)
     const transformers = [
       {
         id: "text-preprocessor",
@@ -91,5 +89,3 @@ async function handler(req, res) {
 
   return res.status(405).json({ error: "Method not allowed" });
 }
-
-export default requireAuth(handler);

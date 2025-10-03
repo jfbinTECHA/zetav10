@@ -1,11 +1,10 @@
-import { requireAuth } from '../../utils/auth.js';
-
-async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   // Mock agents data - in a real system this would come from a database or external service
+  // Public dashboard information showing agent status
   const agents = [
     {
       id: "agent-1",
@@ -62,5 +61,3 @@ async function handler(req, res) {
 
   return res.status(200).json({ agents });
 }
-
-export default requireAuth(handler);

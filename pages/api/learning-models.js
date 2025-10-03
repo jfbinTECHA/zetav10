@@ -1,12 +1,9 @@
-import { requireAuth } from '../../utils/auth.js';
-
-// API endpoint for managing learning models
-async function handler(req, res) {
+export default async function handler(req, res) {
   const { method } = req;
 
   switch (method) {
     case "GET":
-      // Get all learning models
+      // Get all learning models (public dashboard information)
       try {
         // Mock data for demonstration - in a real app, this would come from a database
         const learningModels = [
@@ -217,5 +214,3 @@ async function handler(req, res) {
       res.status(405).json({ error: `Method ${method} not allowed` });
   }
 }
-
-export default requireAuth(handler);

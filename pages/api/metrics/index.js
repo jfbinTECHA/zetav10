@@ -1,8 +1,6 @@
-import { requireAuth } from '../../../utils/auth.js';
-
-async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method === 'GET') {
-    // Mock real-time metrics data
+    // Mock real-time metrics data (public dashboard metrics)
     const metrics = {
       system: {
         cpu: Math.random() * 100,
@@ -36,5 +34,3 @@ async function handler(req, res) {
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
-
-export default requireAuth(handler);
